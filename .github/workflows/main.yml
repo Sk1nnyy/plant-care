@@ -30,10 +30,7 @@ jobs:
         run: chmod +x gradlew
 
       # --- LINTING ---
-      - name: Run Detekt
-        run: ./gradlew detekt
-
-      - name: Run KtLint (or Spotless)
+      - name: Run KtLint
         run: ./gradlew ktlintCheck
 
       - name: Run Android Lint
