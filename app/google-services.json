@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "654727576968",
+    "project_id": "plant-care-e820b",
+    "storage_bucket": "plant-care-e820b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:654727576968:android:1181cd7617825cbc20ce3d",
+        "android_client_info": {
+          "package_name": "com.skinnyy.plantcare"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "654727576968-594jjq5bm10tk2gk3tdkdmnamsmbklr3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB5paaiFItTHVCM5Rt5qb2VC22BVRlqU7s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "654727576968-594jjq5bm10tk2gk3tdkdmnamsmbklr3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

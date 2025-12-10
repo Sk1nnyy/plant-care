@@ -1,0 +1,56 @@
+package com.skinnyy.plantcare
+
+import android.app.Application
+import com.skinnyy.plantcare.api.AuthRepository
+import com.skinnyy.plantcare.api.TreffloRepository
+import com.skinnyy.plantcare.api.TreffloService
+import com.skinnyy.plantcare.ui.plantdetail.PlantDetailViewModel
+import com.skinnyy.plantcare.ui.search.SearchViewModel
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.context.startKoin
+import org.koin.core.module.dsl.viewModel
+import org.koin.dsl.module
+import retrofit2.Retrofit
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
+
+class PlantCareApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+
+        startKoin {
+            androidLogger()
+            androidContext(this@PlantCareApplication)
+            modules(
+                module {
+                    single<Retrofit> {
+                        Retrofit
+                            .Builder()
+                            .baseUrl("https://trefle.io/api/v1/")
+                            .addConverterFactory(
+                                Json {
+                                    ignoreUnknownKeys = true
+                                    explicitNulls = false
+                                }.asConverterFactory("application/json".toMediaType()),
+                            ).build()
+                    }
+
+                    single {
+                        val retrofit = get<Retrofit>()
+                        retrofit.create(TreffloService::class.java)
+                    }
+
+                    single { AuthRepository() }
+                    single { TreffloRepository(get(), get()) }
+
+                    viewModel { SearchViewModel(get()) }
+                    viewModel { parameters ->
+                        PlantDetailViewModel(parameters.get(), get())
+                    }
+                },
+            )
+        }
+    }
+}
