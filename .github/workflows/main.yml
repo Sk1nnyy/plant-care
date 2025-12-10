@@ -41,11 +41,15 @@ jobs:
         run: ./gradlew testDebugUnitTest
 
       # --- BUILD ---
-      - name: Assemble Debug
-        run: ./gradlew assembleDebug
+      - name: Install Firebase CLI
+        run: curl -sL https://firebase.tools | bash
 
-      - name: Upload Debug APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+      - name: Authenticate Firebase
+        run: echo "${{ secrets.FIREBASE_SECRET }}" > serviceAccountKey.json
+
+      - name: Upload to Firebase App Distribution
+        run: |
+          firebase appdistribution:distribute app/build/outputs/apk/release/app-release.apk \
+            --app ${{ secrets.FIREBASE_APP_ID }} \
+            --release-notes "Release build from GitHub Actions" \
+            --groups "testers"
