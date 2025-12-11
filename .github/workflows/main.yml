@@ -41,7 +41,7 @@ jobs:
         run: ./gradlew testDebugUnitTest
       
       - name: Build release APK
-        run: ./gradlew :app:assembleRelease
+        run: ./gradlew :app:assembleDebug
 
       - name: List APK outputs
         run: ls -R
@@ -52,7 +52,7 @@ jobs:
         with:
           appId: ${{ secrets.FIREBASE_APP_ID }}
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SECRET }}
-          file: app/build/outputs/apk/release/app-release-unsigned.apk
+          file: app/build/outputs/apk/debug/app-debug.apk
           groups: testers
           releaseNotes: "Automatic build from GitHub Actions"
 
