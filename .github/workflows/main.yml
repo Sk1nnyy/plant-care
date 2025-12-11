@@ -72,3 +72,4 @@ jobs:
             --app ${{ secrets.FIREBASE_APP_ID }} \
             --groups "testers" \
             --release-notes "Build from GitHub Actions (${GITHUB_SHA})"
+            --token "${{ steps.fbtoken.outputs.token }}"
