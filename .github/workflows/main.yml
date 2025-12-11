@@ -52,7 +52,7 @@ jobs:
         with:
           appId: ${{ secrets.FIREBASE_APP_ID }}
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SECRET }}
-          file: app/build/outputs/apk/release/app-release.apk
+          file: app/build/outputs/apk/release/app-release-unsigned.apk
           groups: testers
           releaseNotes: "Automatic build from GitHub Actions"
 
