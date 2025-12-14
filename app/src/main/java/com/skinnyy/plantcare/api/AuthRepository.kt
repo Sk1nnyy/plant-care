@@ -5,9 +5,6 @@ import com.google.firebase.Firebase
 import com.google.firebase.functions.functions
 import com.skinnyy.plantcare.data.TokenResponse
 import kotlinx.coroutines.tasks.await
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import org.json.JSONObject
 import kotlin.collections.get
 
 class AuthRepository {
@@ -16,12 +13,11 @@ class AuthRepository {
     suspend fun getOrRefreshToken(): String {
         if (activeToken == null) { // Add expiration date
             try {
-                val ip = getPublicIp()
                 val result =
                     Firebase
                         .functions("europe-west1")
                         .getHttpsCallable("getClientToken")
-                        .call(mapOf("ip" to ip))
+                        .call(null)
                         .await()
 
                 val raw = result.data as Map<*, *>
@@ -41,17 +37,5 @@ class AuthRepository {
         }
 
         return activeToken?.token.orEmpty()
-    }
-
-    suspend fun getPublicIp(): String {
-        val client = OkHttpClient()
-        val request =
-            Request
-                .Builder()
-                .url("https://api.ipify.org?format=json")
-                .build()
-        val response = client.newCall(request).execute()
-        val json = JSONObject(response.body!!.string())
-        return json.getString("ip")
     }
 }
