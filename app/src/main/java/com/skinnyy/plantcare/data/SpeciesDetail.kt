@@ -44,4 +44,5 @@ data class SpeciesDetail(
     @SerialName("fruit_or_seed") val fruitOrSeed: FruitOrSeed? = null,
     val specifications: Specifications? = null,
     val growth: Growth? = null,
+    @SerialName("main_species") val mainSpecies: MainSpecies,
 )

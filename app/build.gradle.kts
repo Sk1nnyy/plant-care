@@ -5,7 +5,7 @@ plugins {
     id("com.google.gms.google-services")
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ktlint)
-    id("com.google.firebase.crashlytics")
+    alias(libs.plugins.firebase.crashlytics)
 }
 
 android {

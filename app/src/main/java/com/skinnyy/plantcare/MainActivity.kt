@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
@@ -23,6 +25,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.skinnyy.plantcare.ui.plantdetail.PlantDetailScreen
 import com.skinnyy.plantcare.ui.search.SearchScreen
+import com.skinnyy.plantcare.ui.signin.SignInScreen
 import com.skinnyy.plantcare.ui.theme.PlantCareTheme
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -64,12 +67,19 @@ fun PlantCareApp() {
     ) {
         NavHost(
             navController,
-            startDestination = "search",
+            startDestination = "signin",
         ) {
+            composable("signin") { SignInScreen(navController) }
             composable("search") { SearchScreen(navController) }
             composable(
                 "plant_detail/{id}",
                 arguments = listOf(navArgument("id") { type = NavType.StringType }),
+                enterTransition = {
+                    slideInHorizontally { it }
+                },
+                exitTransition = {
+                    slideOutHorizontally { it }
+                },
             ) { entry ->
                 val id = entry.arguments?.getString("id")!!
                 PlantDetailScreen(koinViewModel { parametersOf(id) })

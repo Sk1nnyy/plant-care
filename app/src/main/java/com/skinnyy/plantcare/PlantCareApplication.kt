@@ -6,6 +6,7 @@ import com.skinnyy.plantcare.api.TreffloRepository
 import com.skinnyy.plantcare.api.TreffloService
 import com.skinnyy.plantcare.ui.plantdetail.PlantDetailViewModel
 import com.skinnyy.plantcare.ui.search.SearchViewModel
+import com.skinnyy.plantcare.ui.signin.SignInViewModel
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import org.koin.android.ext.koin.androidContext
@@ -45,6 +46,7 @@ class PlantCareApplication : Application() {
                     single { AuthRepository() }
                     single { TreffloRepository(get(), get()) }
 
+                    viewModel { SignInViewModel(get()) }
                     viewModel { SearchViewModel(get()) }
                     viewModel { parameters ->
                         PlantDetailViewModel(parameters.get(), get())

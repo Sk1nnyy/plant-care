@@ -1,22 +1,39 @@
 package com.skinnyy.plantcare.ui.plantdetail
 
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.skinnyy.plantcare.R
 import com.skinnyy.plantcare.ui.search.RemoteImage
 import com.skinnyy.plantcare.ui.theme.PlantCareTheme
 
@@ -36,31 +53,90 @@ fun PlantDetailContent(
     uiState: PlantDetailViewModel.UiState,
     modifier: Modifier = Modifier,
 ) {
+    val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
     BottomSheetScaffold(
         modifier = modifier,
         sheetPeekHeight = ScreenHeightMinus300dp(),
         sheetSwipeEnabled = false,
         sheetDragHandle = null,
+        topBar = {
+            TopAppBar(
+                title = { Text(uiState.species?.scientificName.orEmpty()) },
+                navigationIcon = {
+                    IconButton(onClick = { onBackPressedDispatcher?.onBackPressedDispatcher?.onBackPressed() }) {
+                        Icon(painter = painterResource(R.drawable.ic_search), null)
+                    }
+                },
+            )
+        },
         sheetContent = {
             Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
                 modifier =
                     Modifier
                         .fillMaxWidth()
+                        .heightIn(max = ScreenHeightMinus300dp())
                         .verticalScroll(rememberScrollState())
-                        .padding(16.dp),
+                        .padding(16.dp)
+                        .padding(top = 16.dp),
             ) {
                 Text(
                     uiState.species?.scientificName.orEmpty(),
                     style = MaterialTheme.typography.titleLarge,
-                    modifier =
-                        Modifier
-                            .height(100.dp),
                 )
 
+                Column {
+                    Text("Edible", style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        uiState.species
+                            ?.mainSpecies
+                            ?.edible
+                            ?.toString()
+                            .orEmpty(),
+                    )
+                    Text(
+                        uiState.species
+                            ?.mainSpecies
+                            ?.ediblePart
+                            ?.toString()
+                            .orEmpty(),
+                    )
+                }
+                Column {
+                    Text("Distribution", style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        uiState.species
+                            ?.mainSpecies
+                            ?.distribution
+                            ?.native
+                            ?.joinToString(", ")
+                            .toString(),
+                    )
+                }
+
+                var gallerySectionVisible by remember { mutableStateOf(false) }
                 Text(
-                    uiState.species?.commonName.orEmpty(),
-                    style = MaterialTheme.typography.bodyMedium,
+                    "Gallery",
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .clickable { gallerySectionVisible = !gallerySectionVisible },
                 )
+                AnimatedVisibility(gallerySectionVisible) {
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        uiState.species?.mainSpecies?.images?.forEach { it ->
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text(it.key, style = MaterialTheme.typography.titleSmall)
+                                LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                    items(it.value) {
+                                        RemoteImage(it.imageUrl, modifier = Modifier.size(64.dp))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
     ) {

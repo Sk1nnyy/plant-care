@@ -2,6 +2,7 @@ package com.skinnyy.plantcare.api
 
 import android.util.Log
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.functions.functions
 import com.skinnyy.plantcare.data.TokenResponse
 import kotlinx.coroutines.tasks.await
@@ -32,10 +33,25 @@ class AuthRepository {
                 activeToken = tokenResponse
             } catch (e: Exception) {
                 Log.e("Debugger", "Error getting token", e)
-                throw IllegalArgumentException()
+                throw e
             }
         }
 
         return activeToken?.token.orEmpty()
     }
+
+    suspend fun signInAnonymously(): Boolean {
+        val result = FirebaseAuth.getInstance().signInAnonymously().await()
+        return result.user != null
+    }
+
+    suspend fun signInWithEmailAndPassword(
+        email: String,
+        password: String,
+    ): Boolean {
+        val result = FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password).await()
+        return result.user != null
+    }
+
+    fun isUserLoggedIn() = FirebaseAuth.getInstance().currentUser != null
 }
