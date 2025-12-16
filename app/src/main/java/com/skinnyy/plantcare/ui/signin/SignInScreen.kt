@@ -37,7 +37,7 @@ fun SignInScreen(
     val uiAction = viewModel.uiEvents.collectAsState(null).value
     LaunchedEffect(uiAction) {
         when (uiAction) {
-            is SignInViewModel.UiAction.MoveToMain -> navController.navigate("search")
+            is SignInViewModel.UiAction.MoveToMain -> navController.navigate("home")
             null -> {}
         }
     }

@@ -4,6 +4,7 @@ import android.app.Application
 import com.skinnyy.plantcare.api.AuthRepository
 import com.skinnyy.plantcare.api.TreffloRepository
 import com.skinnyy.plantcare.api.TreffloService
+import com.skinnyy.plantcare.ui.home.HomeViewModel
 import com.skinnyy.plantcare.ui.plantdetail.PlantDetailViewModel
 import com.skinnyy.plantcare.ui.search.SearchViewModel
 import com.skinnyy.plantcare.ui.signin.SignInViewModel
@@ -46,6 +47,7 @@ class PlantCareApplication : Application() {
                     single { AuthRepository() }
                     single { TreffloRepository(get(), get()) }
 
+                    viewModel { HomeViewModel() }
                     viewModel { SignInViewModel(get()) }
                     viewModel { SearchViewModel(get()) }
                     viewModel { parameters ->
