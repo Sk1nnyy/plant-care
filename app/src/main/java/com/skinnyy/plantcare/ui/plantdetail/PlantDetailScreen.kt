@@ -2,6 +2,8 @@ package com.skinnyy.plantcare.ui.plantdetail
 
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,12 +24,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,7 +57,27 @@ fun PlantDetailContent(
     uiState: PlantDetailViewModel.UiState,
     modifier: Modifier = Modifier,
 ) {
+    var isFavorited by remember { mutableStateOf(false) }
+    var visualFavorite by remember { mutableStateOf(isFavorited) }
+
     val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
+
+    val scale = remember { Animatable(1f) }
+
+    LaunchedEffect(isFavorited) {
+        // Scale up
+        scale.animateTo(
+            targetValue = 1.2f,
+            animationSpec = tween(durationMillis = 120),
+        )
+        // Swap icon at peak
+        visualFavorite = isFavorited
+        // Scale back down
+        scale.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 120),
+        )
+    }
     BottomSheetScaffold(
         modifier = modifier,
         sheetPeekHeight = ScreenHeightMinus300dp(),
@@ -64,7 +88,20 @@ fun PlantDetailContent(
                 title = { Text(uiState.species?.scientificName.orEmpty()) },
                 navigationIcon = {
                     IconButton(onClick = { onBackPressedDispatcher?.onBackPressedDispatcher?.onBackPressed() }) {
-                        Icon(painter = painterResource(R.drawable.ic_search), null)
+                        Icon(painter = painterResource(R.drawable.ic_arrow_back), null)
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { isFavorited = !isFavorited }) {
+                        Icon(
+                            painter = painterResource(if (visualFavorite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite),
+                            null,
+                            modifier =
+                                Modifier.graphicsLayer {
+                                    scaleX = scale.value
+                                    scaleY = scale.value
+                                },
+                        )
                     }
                 },
             )

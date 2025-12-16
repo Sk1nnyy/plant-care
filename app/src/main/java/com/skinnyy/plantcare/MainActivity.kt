@@ -4,6 +4,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Box
@@ -56,20 +60,25 @@ fun PlantCareApp() {
                 enterTransition = {
                     slideInHorizontally { it }
                 },
-                exitTransition = {
-                    slideOutHorizontally { it }
-                },
+                exitTransition = { ExitTransition.None },
+                popEnterTransition = { EnterTransition.None },
+                popExitTransition = { slideOutTransition() },
             ) { SearchScreen(navController) }
             composable(
                 "profile",
                 enterTransition = {
                     slideInHorizontally { it }
                 },
-                exitTransition = {
-                    slideOutHorizontally { it }
-                },
+                exitTransition = { ExitTransition.None },
+                popEnterTransition = { EnterTransition.None },
+                popExitTransition = { slideOutTransition() },
             ) { ProfileScreen(navController) }
-            composable("home") { HomeScreen(navController) }
+            composable(
+                "home",
+                exitTransition = { ExitTransition.None },
+                popEnterTransition = { EnterTransition.None },
+                popExitTransition = { slideOutTransition() },
+            ) { HomeScreen(navController) }
             composable(
                 "plant_detail/{id}",
                 arguments = listOf(navArgument("id") { type = NavType.StringType }),
@@ -77,7 +86,13 @@ fun PlantCareApp() {
                     slideInHorizontally { it }
                 },
                 exitTransition = {
-                    slideOutHorizontally { it }
+                    ExitTransition.None
+                },
+                popEnterTransition = {
+                    EnterTransition.None
+                },
+                popExitTransition = {
+                    slideOutTransition()
                 },
             ) { entry ->
                 val id = entry.arguments?.getString("id")!!
@@ -86,6 +101,16 @@ fun PlantCareApp() {
         }
     }
 }
+
+fun slideOutTransition(): ExitTransition =
+    slideOutHorizontally(
+        targetOffsetX = { it },
+        animationSpec =
+            tween(
+                durationMillis = 220,
+                easing = FastOutSlowInEasing,
+            ),
+    )
 
 enum class AppDestinations(
     val label: String,
