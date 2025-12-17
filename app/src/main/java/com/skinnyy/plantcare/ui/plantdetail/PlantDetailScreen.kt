@@ -48,16 +48,17 @@ fun PlantDetailScreen(
 ) {
     val uiState = viewModel.uiState.collectAsState().value
     val uiAction = viewModel.uiEvents.collectAsState(null).value
-    PlantDetailContent(uiState, modifier)
+    PlantDetailContent(uiState, onEvent = { viewModel.onEvent(it) }, modifier)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlantDetailContent(
     uiState: PlantDetailViewModel.UiState,
+    onEvent: (PlantDetailViewModel.UiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var isFavorited by remember { mutableStateOf(false) }
+    var isFavorited by remember(uiState) { mutableStateOf(uiState.favorite) }
     var visualFavorite by remember { mutableStateOf(isFavorited) }
 
     val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
@@ -92,7 +93,7 @@ fun PlantDetailContent(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { isFavorited = !isFavorited }) {
+                    IconButton(onClick = { onEvent(PlantDetailViewModel.UiEvent.ToggleFavorite(!isFavorited)) }) {
                         Icon(
                             painter = painterResource(if (visualFavorite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite),
                             null,
@@ -123,7 +124,11 @@ fun PlantDetailContent(
                 )
 
                 Column {
-                    Text("Edible", style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        "Edible",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
                     Text(
                         uiState.species
                             ?.mainSpecies
@@ -140,7 +145,7 @@ fun PlantDetailContent(
                     )
                 }
                 Column {
-                    Text("Distribution", style = MaterialTheme.typography.titleSmall)
+                    Text("Distribution", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
                     Text(
                         uiState.species
                             ?.mainSpecies
@@ -155,6 +160,7 @@ fun PlantDetailContent(
                 Text(
                     "Gallery",
                     style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary,
                     modifier =
                         Modifier
                             .fillMaxWidth()
@@ -190,7 +196,7 @@ fun PlantDetailContent(
 @Composable
 private fun PlantDetailContentPreview() {
     PlantCareTheme {
-        PlantDetailContent(PlantDetailViewModel.UiState(false, null))
+        PlantDetailContent(PlantDetailViewModel.UiState(false, null), {})
     }
 }
 

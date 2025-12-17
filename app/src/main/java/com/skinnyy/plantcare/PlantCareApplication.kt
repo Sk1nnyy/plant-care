@@ -1,9 +1,12 @@
 package com.skinnyy.plantcare
 
 import android.app.Application
+import androidx.room.Room
 import com.skinnyy.plantcare.api.AuthRepository
 import com.skinnyy.plantcare.api.TreffloRepository
 import com.skinnyy.plantcare.api.TreffloService
+import com.skinnyy.plantcare.db.AppDatabase
+import com.skinnyy.plantcare.db.FavoritePlantRepository
 import com.skinnyy.plantcare.ui.home.HomeViewModel
 import com.skinnyy.plantcare.ui.plantdetail.PlantDetailViewModel
 import com.skinnyy.plantcare.ui.search.SearchViewModel
@@ -51,8 +54,20 @@ class PlantCareApplication : Application() {
                     viewModel { SignInViewModel(get()) }
                     viewModel { SearchViewModel(get()) }
                     viewModel { parameters ->
-                        PlantDetailViewModel(parameters.get(), get())
+                        PlantDetailViewModel(parameters.get(), get(), get())
                     }
+
+                    single<AppDatabase> {
+                        Room
+                            .databaseBuilder(
+                                applicationContext,
+                                AppDatabase::class.java,
+                                "plant-db",
+                            ).build()
+                    }
+
+                    single { get<AppDatabase>().favoritePlantDao() }
+                    single { FavoritePlantRepository(get()) }
                 },
             )
         }

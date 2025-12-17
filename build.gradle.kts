@@ -7,4 +7,6 @@ plugins {
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.ktlint) apply false
     alias(libs.plugins.firebase.crashlytics) apply false
+    id("com.google.devtools.ksp") version "2.3.4" apply false
+
 }
