@@ -27,6 +27,7 @@ import com.skinnyy.plantcare.ui.profile.ProfileScreen
 import com.skinnyy.plantcare.ui.search.SearchScreen
 import com.skinnyy.plantcare.ui.signin.SignInScreen
 import com.skinnyy.plantcare.ui.theme.PlantCareTheme
+import com.skinnyy.plantcare.ui.themepicker.ThemePickerScreen
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -97,6 +98,18 @@ fun PlantCareApp() {
             ) { entry ->
                 val id = entry.arguments?.getString("id")!!
                 PlantDetailScreen(koinViewModel { parametersOf(id) })
+            }
+
+            composable(
+                "theme",
+                enterTransition = {
+                    slideInHorizontally { it }
+                },
+                exitTransition = { ExitTransition.None },
+                popEnterTransition = { EnterTransition.None },
+                popExitTransition = { slideOutTransition() },
+            ) {
+                ThemePickerScreen(navController)
             }
         }
     }

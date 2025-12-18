@@ -1,4 +1,4 @@
-package com.skinnyy.plantcare.ui.profile
+package com.skinnyy.plantcare.ui.themepicker
 
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.clickable
@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -18,53 +17,59 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.skinnyy.plantcare.R
-import com.skinnyy.plantcare.ui.search.RemoteImage
+import com.skinnyy.plantcare.data.UserTheme
 import com.skinnyy.plantcare.ui.theme.PlantCareTheme
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-internal fun ProfileScreen(
+internal fun ThemePickerScreen(
     navController: NavController,
     modifier: Modifier = Modifier,
-    viewModel: ProfileViewModel = koinViewModel(),
+    viewModel: ThemePickerViewModel = koinViewModel(),
 ) {
+    val uiState = viewModel.uiState.collectAsState().value
     val uiAction = viewModel.uiEvents.collectAsState(null).value
     LaunchedEffect(uiAction) {
         when (uiAction) {
-            ProfileViewModel.UiAction.NavigateToTheme -> navController.navigate("theme")
             null -> {}
         }
     }
-    ProfileContent(modifier = modifier, onEvent = { viewModel.onEvent(it) })
+    LaunchedEffect(Unit) {
+        viewModel.onEvent(ThemePickerViewModel.UiEvent.CheckTheme)
+    }
+    ThemePickerContent(uiState.userTheme, onEvent = { viewModel.onEvent(it) })
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ProfileContent(
-    onEvent: (ProfileViewModel.UiEvent) -> Unit,
+private fun ThemePickerContent(
+    userTheme: UserTheme,
+    onEvent: (ThemePickerViewModel.UiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+    var selectedTheme by remember { mutableStateOf(userTheme) }
+    val isButtonEnabled by remember(userTheme, selectedTheme) { mutableStateOf(selectedTheme != userTheme) }
     Scaffold(
-        modifier = modifier,
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    Text("Profile")
+                    Text("Theme")
                 },
                 navigationIcon = {
                     IconButton(onClick = { onBackPressedDispatcher?.onBackPressed() }) {
@@ -82,32 +87,21 @@ private fun ProfileContent(
                     .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(48.dp),
         ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                RemoteImage(
-                    "www.google.com",
-                    modifier =
-                        Modifier
-                            .size(128.dp)
-                            .clip(CircleShape),
-                )
-                Text("John Doe", style = MaterialTheme.typography.headlineMedium)
-            }
-
             Card {
                 Column {
-                    SettingsItem("Theme", { onEvent(ProfileViewModel.UiEvent.OnThemeClick) })
-                    HorizontalDivider(Modifier.padding(horizontal = 16.dp))
-                    SettingsItem("Notifications", {})
-                    HorizontalDivider(Modifier.padding(horizontal = 16.dp))
-                    SettingsItem("About", {})
+                    UserTheme.entries.forEachIndexed { index, it ->
+                        SettingsItem(it.name, it == selectedTheme, { selectedTheme = it })
+                        if (index < UserTheme.entries.size - 1) {
+                            HorizontalDivider(Modifier.padding(horizontal = 16.dp))
+                        }
+                    }
                 }
             }
 
-            Button(onClick = {}, modifier = Modifier.fillMaxWidth()) {
-                Text("Logout")
+            Button(onClick = {
+                onEvent(ThemePickerViewModel.UiEvent.SetTheme(selectedTheme))
+            }, modifier = Modifier.fillMaxWidth(), enabled = isButtonEnabled) {
+                Text("Confirm")
             }
         }
     }
@@ -116,6 +110,7 @@ private fun ProfileContent(
 @Composable
 private fun SettingsItem(
     label: String,
+    isSelected: Boolean,
     onClick: () -> Unit,
 ) {
     Row(
@@ -125,7 +120,9 @@ private fun SettingsItem(
                 .padding(16.dp),
     ) {
         Text(label, modifier = Modifier.weight(1f))
-        Icon(painterResource(R.drawable.ic_arrow_right), null)
+        if (isSelected) {
+            Icon(painterResource(R.drawable.ic_arrow_right), null)
+        }
     }
 }
 
@@ -133,7 +130,7 @@ private fun SettingsItem(
 @Composable
 private fun SettingsItemPreview() {
     PlantCareTheme {
-        SettingsItem("Personal", {})
+        SettingsItem("Personal", true, {})
     }
 }
 
@@ -141,6 +138,6 @@ private fun SettingsItemPreview() {
 @Composable
 private fun ProfileScreenPreview() {
     PlantCareTheme {
-        ProfileContent({})
+        ThemePickerContent(UserTheme.System, {})
     }
 }

@@ -1,13 +1,23 @@
 package com.skinnyy.plantcare.ui.theme
 
-import android.os.Build
+import android.content.Context
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import com.skinnyy.plantcare.data.UserTheme
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 val DarkColorScheme =
     darkColorScheme(
@@ -47,34 +57,47 @@ private val LightColorScheme =
         primary = Purple40,
         secondary = PurpleGrey40,
         tertiary = Pink40,
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-     */
+        /* Other default colors to override
+        background = Color(0xFFFFFBFE),
+        surface = Color(0xFFFFFBFE),
+        onPrimary = Color.White,
+        onSecondary = Color.White,
+        onTertiary = Color.White,
+        onBackground = Color(0xFF1C1B1F),
+        onSurface = Color(0xFF1C1B1F),
+         */
     )
 
 @Composable
 fun PlantCareTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit,
 ) {
+    val context = LocalContext.current
+    val themeFlow: Flow<UserTheme> =
+        remember {
+            context.dataStore.data
+                .map { preferences ->
+                    when (preferences[THEME_KEY]) {
+                        UserTheme.Light.name -> UserTheme.Light
+                        UserTheme.Dark.name -> UserTheme.Dark
+                        UserTheme.System.name -> UserTheme.System
+                        else -> UserTheme.System // default
+                    }
+                }
+        }
+    val userTheme by themeFlow.collectAsState(initial = UserTheme.System)
+    val useDark =
+        when (userTheme) {
+            UserTheme.Light -> false
+            UserTheme.Dark -> true
+            UserTheme.System -> darkTheme
+        }
     val colorScheme =
         when {
-            dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-                val context = LocalContext.current
-                // if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-                DarkColorScheme
-            }
-
-            darkTheme -> DarkColorScheme
-            else -> DarkColorScheme
+            useDark -> DarkColorScheme
+            else -> LightColorScheme
         }
 
     MaterialTheme(
@@ -83,3 +106,6 @@ fun PlantCareTheme(
         content = content,
     )
 }
+
+val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
+val THEME_KEY = stringPreferencesKey("theme")

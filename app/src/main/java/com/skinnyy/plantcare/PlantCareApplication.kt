@@ -1,6 +1,7 @@
 package com.skinnyy.plantcare
 
 import android.app.Application
+import android.content.Context
 import androidx.room.Room
 import com.skinnyy.plantcare.api.AuthRepository
 import com.skinnyy.plantcare.api.TreffloRepository
@@ -9,8 +10,11 @@ import com.skinnyy.plantcare.db.AppDatabase
 import com.skinnyy.plantcare.db.FavoritePlantRepository
 import com.skinnyy.plantcare.ui.home.HomeViewModel
 import com.skinnyy.plantcare.ui.plantdetail.PlantDetailViewModel
+import com.skinnyy.plantcare.ui.profile.ProfileViewModel
 import com.skinnyy.plantcare.ui.search.SearchViewModel
 import com.skinnyy.plantcare.ui.signin.SignInViewModel
+import com.skinnyy.plantcare.ui.theme.dataStore
+import com.skinnyy.plantcare.ui.themepicker.ThemePickerViewModel
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import org.koin.android.ext.koin.androidContext
@@ -56,7 +60,10 @@ class PlantCareApplication : Application() {
                     viewModel { parameters ->
                         PlantDetailViewModel(parameters.get(), get(), get())
                     }
+                    viewModel { ProfileViewModel(get()) }
+                    viewModel { ThemePickerViewModel(get()) }
 
+                    single { get<Context>().dataStore }
                     single<AppDatabase> {
                         Room
                             .databaseBuilder(
