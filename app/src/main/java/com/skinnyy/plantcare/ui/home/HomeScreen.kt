@@ -2,6 +2,7 @@ package com.skinnyy.plantcare.ui.home
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -30,6 +31,8 @@ internal fun HomeScreen(
         when (uiActions) {
             HomeViewModel.UiAction.NavigateIntoProfile -> navController.navigate("profile")
             HomeViewModel.UiAction.NavigateIntoSearch -> navController.navigate("search")
+            HomeViewModel.UiAction.NavigateIntoFavorites -> navController.navigate("favorites")
+            HomeViewModel.UiAction.NavigateIntoMyPlants -> navController.navigate("my_plants")
             null -> {}
         }
     }
@@ -64,6 +67,12 @@ private fun HomeContent(
         },
     ) { paddingValues ->
         Column(Modifier.padding(paddingValues)) {
+            Button({ onEvent(HomeViewModel.UiEvent.OnSeeAllFavoritesClick) }) {
+                Text("Favorites")
+            }
+            Button({ onEvent(HomeViewModel.UiEvent.OnSeeAllMyPlants) }) {
+                Text("MyPlants")
+            }
         }
     }
 }

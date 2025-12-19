@@ -26,6 +26,18 @@ class HomeViewModel : ViewModel() {
                 viewModelScope.launch {
                     _uiActions.emit(UiAction.NavigateIntoSearch)
                 }
+
+            UiEvent.OnSeeAllFavoritesClick -> {
+                viewModelScope.launch {
+                    _uiActions.emit(UiAction.NavigateIntoFavorites)
+                }
+            }
+
+            UiEvent.OnSeeAllMyPlants -> {
+                viewModelScope.launch {
+                    _uiActions.emit(UiAction.NavigateIntoMyPlants)
+                }
+            }
         }
     }
 
@@ -39,11 +51,19 @@ class HomeViewModel : ViewModel() {
         data object OnProfileClick : UiEvent()
 
         data object OnSearchClick : UiEvent()
+
+        data object OnSeeAllFavoritesClick : UiEvent()
+
+        data object OnSeeAllMyPlants : UiEvent()
     }
 
     sealed class UiAction {
         data object NavigateIntoSearch : UiAction()
 
         data object NavigateIntoProfile : UiAction()
+
+        data object NavigateIntoFavorites : UiAction()
+
+        data object NavigateIntoMyPlants : UiAction()
     }
 }

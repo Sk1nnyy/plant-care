@@ -8,7 +8,10 @@ import com.skinnyy.plantcare.api.TreffloRepository
 import com.skinnyy.plantcare.api.TreffloService
 import com.skinnyy.plantcare.db.AppDatabase
 import com.skinnyy.plantcare.db.FavoritePlantRepository
+import com.skinnyy.plantcare.db.PersonalPlantsRepository
+import com.skinnyy.plantcare.ui.favorites.FavoritesViewModel
 import com.skinnyy.plantcare.ui.home.HomeViewModel
+import com.skinnyy.plantcare.ui.myplants.MyPlantsViewModel
 import com.skinnyy.plantcare.ui.plantdetail.PlantDetailViewModel
 import com.skinnyy.plantcare.ui.profile.ProfileViewModel
 import com.skinnyy.plantcare.ui.search.SearchViewModel
@@ -62,6 +65,8 @@ class PlantCareApplication : Application() {
                     }
                     viewModel { ProfileViewModel(get()) }
                     viewModel { ThemePickerViewModel(get()) }
+                    viewModel { FavoritesViewModel(get()) }
+                    viewModel { MyPlantsViewModel(get()) }
 
                     single { get<Context>().dataStore }
                     single<AppDatabase> {
@@ -74,7 +79,9 @@ class PlantCareApplication : Application() {
                     }
 
                     single { get<AppDatabase>().favoritePlantDao() }
+                    single { get<AppDatabase>().personalPlantDao() }
                     single { FavoritePlantRepository(get()) }
+                    single { PersonalPlantsRepository(get()) }
                 },
             )
         }

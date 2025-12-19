@@ -21,7 +21,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.skinnyy.plantcare.ui.favorites.FavoritesScreen
 import com.skinnyy.plantcare.ui.home.HomeScreen
+import com.skinnyy.plantcare.ui.myplants.MyPlantsScreen
 import com.skinnyy.plantcare.ui.plantdetail.PlantDetailScreen
 import com.skinnyy.plantcare.ui.profile.ProfileScreen
 import com.skinnyy.plantcare.ui.search.SearchScreen
@@ -110,6 +112,30 @@ fun PlantCareApp() {
                 popExitTransition = { slideOutTransition() },
             ) {
                 ThemePickerScreen(navController)
+            }
+
+            composable(
+                "favorites",
+                enterTransition = {
+                    slideInHorizontally { it }
+                },
+                exitTransition = { ExitTransition.None },
+                popEnterTransition = { EnterTransition.None },
+                popExitTransition = { slideOutTransition() },
+            ) {
+                FavoritesScreen(navController)
+            }
+
+            composable(
+                "my_plants",
+                enterTransition = {
+                    slideInHorizontally { it }
+                },
+                exitTransition = { ExitTransition.None },
+                popEnterTransition = { EnterTransition.None },
+                popExitTransition = { slideOutTransition() },
+            ) {
+                MyPlantsScreen(navController)
             }
         }
     }
