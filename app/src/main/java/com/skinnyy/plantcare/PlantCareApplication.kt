@@ -11,8 +11,11 @@ import com.skinnyy.plantcare.db.FavoritePlantRepository
 import com.skinnyy.plantcare.db.PersonalPlantsRepository
 import com.skinnyy.plantcare.ui.favorites.FavoritesViewModel
 import com.skinnyy.plantcare.ui.home.HomeViewModel
+import com.skinnyy.plantcare.ui.myplantdetail.MyPlantDetailViewModel
 import com.skinnyy.plantcare.ui.myplants.MyPlantsViewModel
+import com.skinnyy.plantcare.ui.newplant.NewPlantsViewModel
 import com.skinnyy.plantcare.ui.plantdetail.PlantDetailViewModel
+import com.skinnyy.plantcare.ui.plantpicker.PlantPickerViewModel
 import com.skinnyy.plantcare.ui.profile.ProfileViewModel
 import com.skinnyy.plantcare.ui.search.SearchViewModel
 import com.skinnyy.plantcare.ui.signin.SignInViewModel
@@ -67,6 +70,9 @@ class PlantCareApplication : Application() {
                     viewModel { ThemePickerViewModel(get()) }
                     viewModel { FavoritesViewModel(get()) }
                     viewModel { MyPlantsViewModel(get()) }
+                    viewModel { NewPlantsViewModel(get(), get()) }
+                    viewModel { PlantPickerViewModel(get()) }
+                    viewModel { parameters -> MyPlantDetailViewModel(parameters.get(), get(), get()) }
 
                     single { get<Context>().dataStore }
                     single<AppDatabase> {

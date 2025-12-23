@@ -24,7 +24,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
+import com.skinnyy.plantcare.MyPlantDetail
+import com.skinnyy.plantcare.NewPlant
 import com.skinnyy.plantcare.R
 import com.skinnyy.plantcare.db.PersonalPlant
 import com.skinnyy.plantcare.db.PlantWithWateringDates
@@ -34,15 +37,15 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 internal fun MyPlantsScreen(
-    navController: NavController,
+    navController: NavBackStack<NavKey>,
     viewModel: MyPlantsViewModel = koinViewModel(),
 ) {
     val uiState = viewModel.uiState.collectAsState().value
     val uiAction = viewModel.uiEvents.collectAsState(null).value
     LaunchedEffect(uiAction) {
         when (uiAction) {
-            is MyPlantsViewModel.UiAction.NavigateIntoDetail -> navController.navigate("my_plants/${uiAction.id}")
-            MyPlantsViewModel.UiAction.NavigateIntoNewPlant -> navController.navigate("my_plants/new")
+            is MyPlantsViewModel.UiAction.NavigateIntoDetail -> navController.add(MyPlantDetail(uiAction.id))
+            MyPlantsViewModel.UiAction.NavigateIntoNewPlant -> navController.add(NewPlant)
             null -> {}
         }
     }

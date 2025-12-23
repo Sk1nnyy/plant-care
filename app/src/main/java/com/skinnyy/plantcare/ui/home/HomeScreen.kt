@@ -15,24 +15,29 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavController
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
+import com.skinnyy.plantcare.Favorites
+import com.skinnyy.plantcare.MyPlants
+import com.skinnyy.plantcare.Profile
 import com.skinnyy.plantcare.R
+import com.skinnyy.plantcare.Search
 import com.skinnyy.plantcare.ui.theme.PlantCareTheme
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 internal fun HomeScreen(
-    navController: NavController,
+    navController: NavBackStack<NavKey>,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val uiActions = viewModel.uiActions.collectAsState(null).value
     LaunchedEffect(uiActions) {
         when (uiActions) {
-            HomeViewModel.UiAction.NavigateIntoProfile -> navController.navigate("profile")
-            HomeViewModel.UiAction.NavigateIntoSearch -> navController.navigate("search")
-            HomeViewModel.UiAction.NavigateIntoFavorites -> navController.navigate("favorites")
-            HomeViewModel.UiAction.NavigateIntoMyPlants -> navController.navigate("my_plants")
+            HomeViewModel.UiAction.NavigateIntoProfile -> navController.add(Profile)
+            HomeViewModel.UiAction.NavigateIntoSearch -> navController.add(Search)
+            HomeViewModel.UiAction.NavigateIntoFavorites -> navController.add(Favorites)
+            HomeViewModel.UiAction.NavigateIntoMyPlants -> navController.add(MyPlants)
             null -> {}
         }
     }

@@ -1,4 +1,4 @@
-package com.skinnyy.plantcare.ui.search
+package com.skinnyy.plantcare.ui.plantpicker
 
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.clickable
@@ -43,40 +43,46 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.error
 import coil3.request.placeholder
-import com.skinnyy.plantcare.PlantDetail
+import com.skinnyy.plantcare.PlantPicker
 import com.skinnyy.plantcare.R
 import com.skinnyy.plantcare.data.Species
 import com.skinnyy.plantcare.ui.theme.PlantCareTheme
+import com.skinnyy.plantcare.utils.LocalResultEventBus
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-internal fun SearchScreen(
+internal fun PlantPickerScreen(
     navController: NavBackStack<NavKey>,
-    viewModel: SearchViewModel = koinViewModel(),
+    viewModel: PlantPickerViewModel = koinViewModel(),
 ) {
     val uiState = viewModel.uiState.collectAsState().value
     val uiAction = viewModel.uiEvents.collectAsState(null).value
+    val eventBus = LocalResultEventBus.current
     LaunchedEffect(uiAction) {
         when (uiAction) {
-            is SearchViewModel.UiAction.NavigateIntDetail -> navController.add(PlantDetail(uiAction.id))
+            is PlantPickerViewModel.UiAction.OnPlantPicked -> {
+                eventBus.sendResult<String>(result = uiAction.id)
+                navController.remove(PlantPicker)
+            }
+
             null -> {}
         }
     }
-    SearchScreenContent(uiState, onEvent = { viewModel.onEvent(it) })
+    PlantPickerContent(uiState, onEvent = { viewModel.onEvent(it) })
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SearchScreenContent(
-    uiState: SearchViewModel.UiState,
-    onEvent: (SearchViewModel.UiEvent) -> Unit,
+private fun PlantPickerContent(
+    uiState: PlantPickerViewModel.UiState,
+    onEvent: (PlantPickerViewModel.UiEvent) -> Unit,
 ) {
     val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    Text("Search")
+                    Text("Choose a plant")
                 },
                 navigationIcon = {
                     IconButton(onClick = { onBackPressedDispatcher?.onBackPressed() }) {
@@ -102,7 +108,7 @@ private fun SearchScreenContent(
                         searchBarState = searchBarState,
                         onSearch = {
                             onEvent(
-                                SearchViewModel.UiEvent.QueryChanged(
+                                PlantPickerViewModel.UiEvent.QueryChanged(
                                     textFieldState.text,
                                 ),
                             )
@@ -132,9 +138,17 @@ private fun SearchScreenContent(
                 item(span = { GridItemSpan(2) }) { Spacer(Modifier.height(16.dp)) }
                 items(uiState.species) { specie ->
 
-                    PlantListItem(specie.scientificName.orEmpty(), specie.imageUrl.orEmpty(), {
-                        onEvent(SearchViewModel.UiEvent.NavigateIntDetail(specie.id?.toString().orEmpty()))
-                    })
+                    PlantListItem(
+                        specie.scientificName.orEmpty(),
+                        specie.imageUrl.orEmpty(),
+                        {
+                            onEvent(
+                                PlantPickerViewModel.UiEvent.OnPlantClick(
+                                    specie.id?.toString().orEmpty(),
+                                ),
+                            )
+                        },
+                    )
                 }
                 if (uiState.isLoading) {
                     item(span = { GridItemSpan(2) }) {
@@ -154,10 +168,10 @@ private fun SearchScreenContent(
 
 @Preview
 @Composable
-private fun SearchScreenPreview() {
+private fun PlantPickerScreenPreview() {
     PlantCareTheme {
-        SearchScreenContent(
-            SearchViewModel.UiState(
+        PlantPickerContent(
+            PlantPickerViewModel.UiState(
                 isLoading = false,
                 species =
                     listOf(

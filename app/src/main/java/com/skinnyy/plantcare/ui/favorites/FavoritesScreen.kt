@@ -22,7 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
+import com.skinnyy.plantcare.PlantDetail
 import com.skinnyy.plantcare.R
 import com.skinnyy.plantcare.db.FavoritePlant
 import com.skinnyy.plantcare.ui.search.RemoteImage
@@ -31,7 +33,7 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 internal fun FavoritesScreen(
-    navController: NavController,
+    navController: NavBackStack<NavKey>,
     modifier: Modifier = Modifier,
     viewModel: FavoritesViewModel = koinViewModel(),
 ) {
@@ -39,7 +41,7 @@ internal fun FavoritesScreen(
     val uiAction = viewModel.uiEvents.collectAsState(null).value
     LaunchedEffect(uiAction) {
         when (uiAction) {
-            is FavoritesViewModel.UiAction.NavigateToPlantDetail -> navController.navigate("plant_detail/${uiAction.id}")
+            is FavoritesViewModel.UiAction.NavigateToPlantDetail -> navController.add(PlantDetail(uiAction.id))
             null -> {}
         }
     }

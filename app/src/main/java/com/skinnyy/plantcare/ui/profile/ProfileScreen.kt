@@ -30,22 +30,24 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import com.skinnyy.plantcare.R
+import com.skinnyy.plantcare.Theme
 import com.skinnyy.plantcare.ui.search.RemoteImage
 import com.skinnyy.plantcare.ui.theme.PlantCareTheme
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 internal fun ProfileScreen(
-    navController: NavController,
+    navController: NavBackStack<NavKey>,
     modifier: Modifier = Modifier,
     viewModel: ProfileViewModel = koinViewModel(),
 ) {
     val uiAction = viewModel.uiEvents.collectAsState(null).value
     LaunchedEffect(uiAction) {
         when (uiAction) {
-            ProfileViewModel.UiAction.NavigateToTheme -> navController.navigate("theme")
+            ProfileViewModel.UiAction.NavigateToTheme -> navController.add(Theme)
             null -> {}
         }
     }

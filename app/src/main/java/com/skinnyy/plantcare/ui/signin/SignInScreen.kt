@@ -23,13 +23,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
+import com.skinnyy.plantcare.Home
 import com.skinnyy.plantcare.ui.theme.PlantCareTheme
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun SignInScreen(
-    navController: NavController,
+    navController: NavBackStack<NavKey>,
     modifier: Modifier = Modifier,
     viewModel: SignInViewModel = koinViewModel(),
 ) {
@@ -37,7 +39,7 @@ fun SignInScreen(
     val uiAction = viewModel.uiEvents.collectAsState(null).value
     LaunchedEffect(uiAction) {
         when (uiAction) {
-            is SignInViewModel.UiAction.MoveToMain -> navController.navigate("home")
+            is SignInViewModel.UiAction.MoveToMain -> navController.add(Home)
             null -> {}
         }
     }

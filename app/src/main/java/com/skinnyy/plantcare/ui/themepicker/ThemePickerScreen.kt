@@ -30,7 +30,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import com.skinnyy.plantcare.R
 import com.skinnyy.plantcare.data.UserTheme
 import com.skinnyy.plantcare.ui.theme.PlantCareTheme
@@ -38,7 +39,7 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 internal fun ThemePickerScreen(
-    navController: NavController,
+    navController: NavBackStack<NavKey>,
     modifier: Modifier = Modifier,
     viewModel: ThemePickerViewModel = koinViewModel(),
 ) {
