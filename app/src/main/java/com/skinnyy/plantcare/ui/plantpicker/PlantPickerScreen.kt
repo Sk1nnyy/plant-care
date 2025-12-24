@@ -49,11 +49,13 @@ import com.skinnyy.plantcare.data.Species
 import com.skinnyy.plantcare.ui.theme.PlantCareTheme
 import com.skinnyy.plantcare.utils.LocalResultEventBus
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @Composable
 internal fun PlantPickerScreen(
     navController: NavBackStack<NavKey>,
-    viewModel: PlantPickerViewModel = koinViewModel(),
+    plantPicker: PlantPicker,
+    viewModel: PlantPickerViewModel = koinViewModel { parametersOf(plantPicker) },
 ) {
     val uiState = viewModel.uiState.collectAsState().value
     val uiAction = viewModel.uiEvents.collectAsState(null).value
@@ -62,7 +64,7 @@ internal fun PlantPickerScreen(
         when (uiAction) {
             is PlantPickerViewModel.UiAction.OnPlantPicked -> {
                 eventBus.sendResult<String>(result = uiAction.id)
-                navController.remove(PlantPicker)
+                navController.remove(plantPicker)
             }
 
             null -> {}

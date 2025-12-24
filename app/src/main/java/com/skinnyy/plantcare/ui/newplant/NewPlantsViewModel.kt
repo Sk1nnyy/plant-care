@@ -61,6 +61,12 @@ class NewPlantsViewModel(
                     _uiEvents.emit(UiAction.GoToPlantDetail(id.toInt()))
                 }
             }
+
+            UiEvent.OnPlantScan -> {
+                viewModelScope.launch {
+                    _uiEvents.emit(UiAction.NavigateIntoPlantChecker)
+                }
+            }
         }
     }
 
@@ -71,6 +77,8 @@ class NewPlantsViewModel(
 
     sealed class UiEvent {
         data object OnPickType : UiEvent()
+
+        data object OnPlantScan : UiEvent()
 
         data class OnPlantTypePicked(
             val id: String,
@@ -85,6 +93,8 @@ class NewPlantsViewModel(
 
     sealed class UiAction {
         data object NavigateIntoSearch : UiAction()
+
+        data object NavigateIntoPlantChecker : UiAction()
 
         data class GoToPlantDetail(
             val plantId: Int,

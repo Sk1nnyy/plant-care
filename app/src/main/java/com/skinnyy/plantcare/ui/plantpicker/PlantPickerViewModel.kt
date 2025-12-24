@@ -2,6 +2,7 @@ package com.skinnyy.plantcare.ui.plantpicker
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.skinnyy.plantcare.PlantPicker
 import com.skinnyy.plantcare.api.TreffloRepository
 import com.skinnyy.plantcare.data.Species
 import kotlinx.coroutines.Dispatchers
@@ -12,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class PlantPickerViewModel(
+    private val plantPicker: PlantPicker,
     private val treffloRepository: TreffloRepository,
 ) : ViewModel() {
     private val _uiState: MutableStateFlow<UiState> = MutableStateFlow(UiState(false, listOf()))
@@ -19,6 +21,12 @@ class PlantPickerViewModel(
 
     private val _uiEvents: MutableSharedFlow<UiAction> = MutableSharedFlow()
     val uiEvents: SharedFlow<UiAction> = _uiEvents
+
+    init {
+        plantPicker.query?.let {
+            search(it)
+        }
+    }
 
     fun onEvent(event: UiEvent) {
         when (event) {

@@ -37,6 +37,7 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import com.skinnyy.plantcare.MyPlantDetail
 import com.skinnyy.plantcare.NewPlant
+import com.skinnyy.plantcare.PlantChecker
 import com.skinnyy.plantcare.PlantPicker
 import com.skinnyy.plantcare.R
 import com.skinnyy.plantcare.db.PersonalPlant
@@ -58,11 +59,13 @@ internal fun NewPlantScreen(
     LaunchedEffect(uiAction) {
         when (uiAction) {
             null -> {}
-            is NewPlantsViewModel.UiAction.NavigateIntoSearch -> navController.add(PlantPicker)
+            is NewPlantsViewModel.UiAction.NavigateIntoSearch -> navController.add(PlantPicker(null))
             is NewPlantsViewModel.UiAction.GoToPlantDetail -> {
                 navController.remove(NewPlant)
                 navController.add(MyPlantDetail(uiAction.plantId))
             }
+
+            NewPlantsViewModel.UiAction.NavigateIntoPlantChecker -> navController.add(PlantChecker)
         }
     }
 
@@ -117,6 +120,22 @@ private fun NewPlantContent(
                         Text("${it.scientificName}")
                     } ?: run {
                         Text("Pick the type")
+                    }
+                }
+            }
+
+            Card {
+                Row(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .clickable { onEvent(NewPlantsViewModel.UiEvent.OnPlantScan) }
+                            .padding(16.dp),
+                ) {
+                    uiState.species?.let {
+                        Text("${it.scientificName}")
+                    } ?: run {
+                        Text("Scan your plant")
                     }
                 }
             }

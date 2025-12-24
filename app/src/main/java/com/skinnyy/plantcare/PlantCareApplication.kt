@@ -14,6 +14,7 @@ import com.skinnyy.plantcare.ui.home.HomeViewModel
 import com.skinnyy.plantcare.ui.myplantdetail.MyPlantDetailViewModel
 import com.skinnyy.plantcare.ui.myplants.MyPlantsViewModel
 import com.skinnyy.plantcare.ui.newplant.NewPlantsViewModel
+import com.skinnyy.plantcare.ui.plantchecker.PlantCheckerViewModel
 import com.skinnyy.plantcare.ui.plantdetail.PlantDetailViewModel
 import com.skinnyy.plantcare.ui.plantpicker.PlantPickerViewModel
 import com.skinnyy.plantcare.ui.profile.ProfileViewModel
@@ -71,8 +72,9 @@ class PlantCareApplication : Application() {
                     viewModel { FavoritesViewModel(get()) }
                     viewModel { MyPlantsViewModel(get()) }
                     viewModel { NewPlantsViewModel(get(), get()) }
-                    viewModel { PlantPickerViewModel(get()) }
+                    viewModel { parameters -> PlantPickerViewModel(parameters.get(), get()) }
                     viewModel { parameters -> MyPlantDetailViewModel(parameters.get(), get(), get()) }
+                    viewModel { PlantCheckerViewModel() }
 
                     single { get<Context>().dataStore }
                     single<AppDatabase> {
