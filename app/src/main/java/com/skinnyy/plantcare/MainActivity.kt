@@ -24,6 +24,7 @@ import com.skinnyy.plantcare.ui.home.HomeScreen
 import com.skinnyy.plantcare.ui.myplantdetail.MyPlantDetailScreen
 import com.skinnyy.plantcare.ui.myplants.MyPlantsScreen
 import com.skinnyy.plantcare.ui.newplant.NewPlantScreen
+import com.skinnyy.plantcare.ui.notifications.NotificationsScreen
 import com.skinnyy.plantcare.ui.plantchecker.PlantCheckerScreen
 import com.skinnyy.plantcare.ui.plantdetail.PlantDetailScreen
 import com.skinnyy.plantcare.ui.plantpicker.PlantPickerScreen
@@ -75,7 +76,7 @@ fun PlantCareApp() {
                     }
 
                     entry<PlantDetail> {
-                        PlantDetailScreen(koinViewModel { parametersOf(it.id) })
+                        PlantDetailScreen(koinViewModel(key = it.id) { parametersOf(it.id) })
                     }
 
                     entry<Profile> {
@@ -86,6 +87,10 @@ fun PlantCareApp() {
                         ThemePickerScreen(backStack)
                     }
 
+                    entry<Notifications> {
+                        NotificationsScreen()
+                    }
+
                     entry<Favorites> {
                         FavoritesScreen(backStack)
                     }
@@ -93,7 +98,7 @@ fun PlantCareApp() {
                         MyPlantsScreen(backStack)
                     }
                     entry<MyPlantDetail> {
-                        MyPlantDetailScreen(backStack, koinViewModel { parametersOf(it.id) })
+                        MyPlantDetailScreen(backStack, koinViewModel(key = it.id.toString()) { parametersOf(it.id) })
                     }
                     entry<NewPlant> {
                         NewPlantScreen(backStack)
@@ -102,7 +107,7 @@ fun PlantCareApp() {
                         PlantPickerScreen(backStack, plantPicker = it)
                     }
                     entry<PlantChecker> {
-                        PlantCheckerScreen(backStack, viewModel = koinViewModel { parametersOf(it) })
+                        PlantCheckerScreen(backStack, viewModel = koinViewModel())
                     }
                 },
             transitionSpec = {
@@ -143,6 +148,9 @@ data object Profile : NavKey
 
 @Serializable
 data object Theme : NavKey
+
+@Serializable
+data object Notifications : NavKey
 
 @Serializable
 data object Favorites : NavKey

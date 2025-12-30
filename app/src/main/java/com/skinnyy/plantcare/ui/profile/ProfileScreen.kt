@@ -32,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import com.skinnyy.plantcare.Notifications
 import com.skinnyy.plantcare.R
 import com.skinnyy.plantcare.Theme
 import com.skinnyy.plantcare.ui.search.RemoteImage
@@ -49,6 +50,7 @@ internal fun ProfileScreen(
         when (uiAction) {
             ProfileViewModel.UiAction.NavigateToTheme -> navController.add(Theme)
             null -> {}
+            ProfileViewModel.UiAction.NavigateToNotifications -> navController.add(Notifications)
         }
     }
     ProfileContent(modifier = modifier, onEvent = { viewModel.onEvent(it) })
@@ -102,7 +104,7 @@ private fun ProfileContent(
                 Column {
                     SettingsItem("Theme", { onEvent(ProfileViewModel.UiEvent.OnThemeClick) })
                     HorizontalDivider(Modifier.padding(horizontal = 16.dp))
-                    SettingsItem("Notifications", {})
+                    SettingsItem("Notifications", { onEvent(ProfileViewModel.UiEvent.OnNotificationsClick) })
                     HorizontalDivider(Modifier.padding(horizontal = 16.dp))
                     SettingsItem("About", {})
                 }

@@ -16,6 +16,10 @@ interface PersonalPlantDao {
     @Query("SELECT * FROM personal_plant WHERE id = :plantId")
     fun getPlantWithWateringDates(plantId: Int): Flow<PlantWithWateringDates>
 
+    @Transaction
+    @Query("SELECT * FROM personal_plant WHERE id = :plantId")
+    fun getPlantWithWateringDatesOneShot(plantId: Int): PlantWithWateringDates
+
     @Insert
     suspend fun insertPlant(plant: PersonalPlant): Long
 

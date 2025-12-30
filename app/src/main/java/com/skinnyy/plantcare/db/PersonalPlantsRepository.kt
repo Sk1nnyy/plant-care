@@ -7,6 +7,8 @@ class PersonalPlantsRepository(
 
     fun getById(id: Int) = dao.getPlantWithWateringDates(id)
 
+    fun getByIdOneShot(id: Int) = dao.getPlantWithWateringDatesOneShot(id)
+
     suspend fun insert(plant: PersonalPlant) = dao.insertPlant(plant)
 
     suspend fun insertWateringEvent(event: WateringEvent) = dao.insertWateringEvent(event)

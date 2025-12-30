@@ -6,11 +6,14 @@ import com.skinnyy.plantcare.api.TreffloRepository
 import com.skinnyy.plantcare.data.SpeciesDetail
 import com.skinnyy.plantcare.db.PersonalPlantsRepository
 import com.skinnyy.plantcare.db.PlantWithWateringDates
+import com.skinnyy.plantcare.db.WateringEvent
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
 
 class MyPlantDetailViewModel(
     private val id: Int,
@@ -33,7 +36,17 @@ class MyPlantDetailViewModel(
 
     fun onEvent(event: UiEvent) {
         when (event) {
-            is UiEvent.ToggleFavorite -> {
+            UiEvent.MarkPlantAsWatered -> {
+                viewModelScope.launch {
+                    val date = SimpleDateFormat.getDateInstance().format(Date())
+                    personalPlantsRepository.insertWateringEvent(
+                        WateringEvent(
+                            id = 0,
+                            plantId = id,
+                            wateredDate = date,
+                        ),
+                    )
+                }
             }
         }
     }
@@ -45,9 +58,7 @@ class MyPlantDetailViewModel(
     )
 
     sealed class UiEvent {
-        data class ToggleFavorite(
-            val favorite: Boolean,
-        ) : UiEvent()
+        data object MarkPlantAsWatered : UiEvent()
     }
 
     sealed class UiAction

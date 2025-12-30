@@ -3,8 +3,10 @@ package com.skinnyy.plantcare.ui.myplantdetail
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -15,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -22,6 +25,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import com.skinnyy.plantcare.R
+import com.skinnyy.plantcare.ui.notifications.createReminderChannel
+import com.skinnyy.plantcare.ui.notifications.scheduleDailyPlantReminder
 import com.skinnyy.plantcare.ui.theme.PlantCareTheme
 
 @Composable
@@ -46,6 +51,11 @@ fun MyPlantDetailContent(
 
     Scaffold(
         modifier = modifier,
+        floatingActionButton = {
+            FloatingActionButton(onClick = { onEvent(MyPlantDetailViewModel.UiEvent.MarkPlantAsWatered) }) {
+                Icon(painterResource(R.drawable.ic_favorite), contentDescription = null)
+            }
+        },
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
@@ -69,6 +79,18 @@ fun MyPlantDetailContent(
             uiState.plantWithWateringDates?.let {
                 Text("Scientific Name")
                 Text(it.plant.scientificName)
+
+                Text("Watering events")
+                it.wateringDates.forEach {
+                    Text("Date: " + it.wateredDate)
+                }
+                val context = LocalContext.current
+                Button(onClick = {
+                    context.createReminderChannel() // once
+                    context.scheduleDailyPlantReminder(it.plant.id, 19, 18)
+                }) {
+                    Text("Set alarm")
+                }
             }
         }
     }

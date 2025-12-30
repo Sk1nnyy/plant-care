@@ -109,3 +109,4 @@ fun PlantCareTheme(
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 val THEME_KEY = stringPreferencesKey("theme")
+val NOTIFICATIONS_ENABLED_KEY = stringPreferencesKey("notifications")

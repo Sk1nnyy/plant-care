@@ -25,6 +25,12 @@ class ProfileViewModel(
                     _uiEvents.emit(UiAction.NavigateToTheme)
                 }
             }
+
+            UiEvent.OnNotificationsClick -> {
+                viewModelScope.launch {
+                    _uiEvents.emit(UiAction.NavigateToNotifications)
+                }
+            }
         }
     }
 
@@ -34,9 +40,13 @@ class ProfileViewModel(
 
     sealed class UiEvent {
         data object OnThemeClick : UiEvent()
+
+        data object OnNotificationsClick : UiEvent()
     }
 
     sealed class UiAction {
         data object NavigateToTheme : UiAction()
+
+        data object NavigateToNotifications : UiAction()
     }
 }
