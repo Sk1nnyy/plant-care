@@ -1,10 +1,15 @@
 package com.skinnyy.plantcare.ui.search
 
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -32,6 +37,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -39,6 +45,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.error
@@ -49,9 +56,12 @@ import com.skinnyy.plantcare.data.Species
 import com.skinnyy.plantcare.ui.theme.PlantCareTheme
 import org.koin.compose.viewmodel.koinViewModel
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun SearchScreen(
     navController: NavBackStack<NavKey>,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedVisibilityScope,
     viewModel: SearchViewModel = koinViewModel(),
 ) {
     val uiState = viewModel.uiState.collectAsState().value
@@ -62,88 +72,98 @@ internal fun SearchScreen(
             null -> {}
         }
     }
-    SearchScreenContent(uiState, onEvent = { viewModel.onEvent(it) })
+    SearchScreenContent(
+        uiState,
+        onEvent = { viewModel.onEvent(it) },
+        sharedTransitionScope = sharedTransitionScope,
+        animatedContentScope = animatedContentScope,
+    )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 private fun SearchScreenContent(
     uiState: SearchViewModel.UiState,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedVisibilityScope,
     onEvent: (SearchViewModel.UiEvent) -> Unit,
 ) {
     val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text("Search")
-                },
-                navigationIcon = {
-                    IconButton(onClick = { onBackPressedDispatcher?.onBackPressed() }) {
-                        Icon(painter = painterResource(R.drawable.ic_arrow_back), null)
-                    }
-                },
-            )
-        },
-    ) { paddingValues ->
-        Column(
-            modifier =
-                Modifier
-                    .padding(paddingValues)
-                    .padding(16.dp),
-        ) {
-            val searchBarState = rememberSearchBarState()
-            val textFieldState = rememberTextFieldState()
-            SearchBar(
-                state = searchBarState,
-                inputField = {
-                    SearchBarDefaults.InputField(
-                        textFieldState = textFieldState,
-                        searchBarState = searchBarState,
-                        onSearch = {
-                            onEvent(
-                                SearchViewModel.UiEvent.QueryChanged(
-                                    textFieldState.text,
-                                ),
-                            )
-                        },
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+    with(sharedTransitionScope) {
+        Scaffold(
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text("Search")
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { onBackPressedDispatcher?.onBackPressed() }) {
+                            Icon(painter = painterResource(R.drawable.ic_arrow_back), null)
+                        }
+                    },
+                )
+            },
+        ) { paddingValues ->
+            Column(
+                modifier =
+                    Modifier
+                        .padding(paddingValues)
+                        .padding(16.dp),
             ) {
-                if (uiState.query.isBlank() && !uiState.isLoading) {
-                    item(span = { GridItemSpan(2) }) {
-                        Text(
-                            "Type something !",
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 16.dp),
+                SearchBar(
+                    {
+                        onEvent(
+                            SearchViewModel.UiEvent.QueryChanged(it),
+                        )
+                    },
+                    modifier =
+                        Modifier.sharedElement(
+                            sharedContentState = rememberSharedContentState("searchBar"),
+                            animatedVisibilityScope = animatedContentScope,
+                        ),
+                )
+
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    if (uiState.query.isBlank() && !uiState.isLoading) {
+                        item(span = { GridItemSpan(2) }) {
+                            Text(
+                                "Type something !",
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 16.dp),
+                            )
+                        }
+                    }
+
+                    item(span = { GridItemSpan(2) }) { Spacer(Modifier.height(16.dp)) }
+                    items(uiState.species) { specie ->
+
+                        PlantListItem(
+                            specie.scientificName.orEmpty(),
+                            specie.imageUrl.orEmpty(),
+                            {
+                                onEvent(
+                                    SearchViewModel.UiEvent.NavigateIntDetail(
+                                        specie.id?.toString().orEmpty(),
+                                    ),
+                                )
+                            },
                         )
                     }
-                }
-
-                item(span = { GridItemSpan(2) }) { Spacer(Modifier.height(16.dp)) }
-                items(uiState.species) { specie ->
-
-                    PlantListItem(specie.scientificName.orEmpty(), specie.imageUrl.orEmpty(), {
-                        onEvent(SearchViewModel.UiEvent.NavigateIntDetail(specie.id?.toString().orEmpty()))
-                    })
-                }
-                if (uiState.isLoading) {
-                    item(span = { GridItemSpan(2) }) {
-                        Box(Modifier.size(64.dp)) {
-                            CircularProgressIndicator(
-                                Modifier
-                                    .size(32.dp)
-                                    .align(Alignment.Center),
-                            )
+                    if (uiState.isLoading) {
+                        item(span = { GridItemSpan(2) }) {
+                            Box(Modifier.size(64.dp)) {
+                                CircularProgressIndicator(
+                                    Modifier
+                                        .size(32.dp)
+                                        .align(Alignment.Center),
+                                )
+                            }
                         }
                     }
                 }
@@ -152,22 +172,67 @@ private fun SearchScreenContent(
     }
 }
 
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+fun SearchBar(
+    onSearch: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    readOnly: Boolean = false,
+    placeholder: @Composable () -> Unit = {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Icon(
+                painterResource(R.drawable.ic_search),
+                contentDescription = null,
+            )
+            Text("Search some plants")
+        }
+    },
+) {
+    val searchBarState = rememberSearchBarState()
+    val textFieldState = rememberTextFieldState()
+    Box {
+        SearchBar(
+            state = searchBarState,
+            inputField = {
+                SearchBarDefaults.InputField(
+                    textFieldState = textFieldState,
+                    searchBarState = searchBarState,
+                    readOnly = readOnly,
+                    onSearch = {
+                        onSearch(textFieldState.text.toString())
+                    },
+                    placeholder = placeholder,
+                )
+            },
+            modifier = modifier.fillMaxWidth(),
+        )
+        if (readOnly) {
+            Box(modifier.matchParentSize())
+        }
+    }
+}
+
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Preview
 @Composable
 private fun SearchScreenPreview() {
     PlantCareTheme {
-        SearchScreenContent(
-            SearchViewModel.UiState(
-                isLoading = false,
-                species =
-                    listOf(
-                        Species(scientificName = "Monstera"),
-                        Species(scientificName = "Pine Tree"),
-                    ),
-                query = "Monst",
-            ),
-            {},
-        )
+        SharedTransitionLayout {
+            SearchScreenContent(
+                SearchViewModel.UiState(
+                    isLoading = false,
+                    species =
+                        listOf(
+                            Species(scientificName = "Monstera"),
+                            Species(scientificName = "Pine Tree"),
+                        ),
+                    query = "Monst",
+                ),
+                this,
+                LocalNavAnimatedContentScope.current,
+                {},
+            )
+        }
     }
 }
 
@@ -215,6 +280,7 @@ private fun PlantListItemPreview() {
 internal fun RemoteImage(
     url: String,
     modifier: Modifier = Modifier,
+    contentScale: ContentScale = ContentScale.Fit,
 ) {
     val context = LocalContext.current
     AsyncImage(
@@ -226,6 +292,7 @@ internal fun RemoteImage(
                 .data(url)
                 .build(),
         contentDescription = null,
+        contentScale = contentScale,
         modifier = modifier,
     )
 }

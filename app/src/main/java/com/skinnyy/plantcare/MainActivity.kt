@@ -6,6 +6,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
@@ -18,6 +20,7 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigation3.ui.NavDisplay
 import com.skinnyy.plantcare.ui.favorites.FavoritesScreen
 import com.skinnyy.plantcare.ui.home.HomeScreen
@@ -51,6 +54,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @PreviewScreenSizes
 @Composable
 fun PlantCareApp() {
@@ -60,72 +64,81 @@ fun PlantCareApp() {
     CompositionLocalProvider(
         LocalResultEventBus provides resultBus,
     ) {
-        NavDisplay(
-            backStack = backStack,
-            onBack = { backStack.removeLastOrNull() },
-            entryProvider =
-                entryProvider {
-                    entry<SignIn> {
-                        SignInScreen(backStack)
-                    }
-                    entry<Home> {
-                        HomeScreen(backStack)
-                    }
-                    entry<Search> {
-                        SearchScreen(backStack)
-                    }
+        SharedTransitionLayout {
+            NavDisplay(
+                backStack = backStack,
+                onBack = { backStack.removeLastOrNull() },
+                entryProvider =
+                    entryProvider {
+                        val sharedTransitionScope = this@SharedTransitionLayout
 
-                    entry<PlantDetail> {
-                        PlantDetailScreen(koinViewModel(key = it.id) { parametersOf(it.id) })
-                    }
+                        entry<SignIn> {
+                            SignInScreen(backStack)
+                        }
+                        entry<Home> {
+                            val animatedContentScope = LocalNavAnimatedContentScope.current
+                            HomeScreen(backStack, sharedTransitionScope, animatedContentScope)
+                        }
+                        entry<Search> {
+                            val animatedContentScope = LocalNavAnimatedContentScope.current
+                            SearchScreen(backStack, sharedTransitionScope, animatedContentScope)
+                        }
 
-                    entry<Profile> {
-                        ProfileScreen(backStack)
-                    }
+                        entry<PlantDetail> {
+                            PlantDetailScreen(koinViewModel(key = it.id) { parametersOf(it.id) })
+                        }
 
-                    entry<Theme> {
-                        ThemePickerScreen(backStack)
-                    }
+                        entry<Profile> {
+                            ProfileScreen(backStack)
+                        }
 
-                    entry<Notifications> {
-                        NotificationsScreen()
-                    }
+                        entry<Theme> {
+                            ThemePickerScreen(backStack)
+                        }
 
-                    entry<Favorites> {
-                        FavoritesScreen(backStack)
-                    }
-                    entry<MyPlants> {
-                        MyPlantsScreen(backStack)
-                    }
-                    entry<MyPlantDetail> {
-                        MyPlantDetailScreen(backStack, koinViewModel(key = it.id.toString()) { parametersOf(it.id) })
-                    }
-                    entry<NewPlant> {
-                        NewPlantScreen(backStack)
-                    }
-                    entry<PlantPicker> {
-                        PlantPickerScreen(backStack, plantPicker = it)
-                    }
-                    entry<PlantChecker> {
-                        PlantCheckerScreen(backStack, viewModel = koinViewModel())
-                    }
+                        entry<Notifications> {
+                            NotificationsScreen()
+                        }
+
+                        entry<Favorites> {
+                            FavoritesScreen(backStack)
+                        }
+                        entry<MyPlants> {
+                            MyPlantsScreen(backStack)
+                        }
+                        entry<MyPlantDetail> {
+                            MyPlantDetailScreen(
+                                backStack,
+                                koinViewModel(key = it.id.toString()) { parametersOf(it.id) },
+                            )
+                        }
+                        entry<NewPlant> {
+                            NewPlantScreen(backStack)
+                        }
+                        entry<PlantPicker> {
+                            PlantPickerScreen(backStack, plantPicker = it)
+                        }
+                        entry<PlantChecker> {
+                            PlantCheckerScreen(backStack, viewModel = koinViewModel())
+                        }
+                    },
+                transitionSpec = {
+                    // Slide in from right when navigating forward
+                    slideInHorizontally(initialOffsetX = { it }) togetherWith
+                        ExitTransition.None
                 },
-            transitionSpec = {
-                // Slide in from right when navigating forward
-                slideInHorizontally(initialOffsetX = { it }) togetherWith
-                    ExitTransition.None
-            },
-            popTransitionSpec = {
-                // Slide in from left when navigating back
-                EnterTransition.None togetherWith
-                    slideOutHorizontally(targetOffsetX = { it })
-            },
-            predictivePopTransitionSpec = {
-                // Slide in from left when navigating back
-                EnterTransition.None togetherWith
-                    slideOutHorizontally(targetOffsetX = { it })
-            },
-        )
+                popTransitionSpec = {
+                    // Slide in from left when navigating back
+                    EnterTransition.None togetherWith
+                        slideOutHorizontally(targetOffsetX = { it })
+                },
+                predictivePopTransitionSpec = {
+                    // Slide in from left when navigating back
+                    EnterTransition.None togetherWith
+                        slideOutHorizontally(targetOffsetX = { it })
+                },
+            )
+        }
     }
 }
 

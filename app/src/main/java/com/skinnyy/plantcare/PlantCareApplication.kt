@@ -62,7 +62,7 @@ class PlantCareApplication : Application() {
                     single { AuthRepository() }
                     single { TreffloRepository(get(), get()) }
 
-                    viewModel { HomeViewModel() }
+                    viewModel { HomeViewModel(get(), get()) }
                     viewModel { SignInViewModel(get()) }
                     viewModel { SearchViewModel(get()) }
                     viewModel { parameters ->
