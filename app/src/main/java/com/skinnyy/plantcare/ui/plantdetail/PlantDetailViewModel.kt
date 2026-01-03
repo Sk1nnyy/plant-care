@@ -46,6 +46,11 @@ class PlantDetailViewModel(
                     false -> removeFavorite()
                 }
             }
+
+            is UiEvent.OnImageClick ->
+                viewModelScope.launch {
+                    _uiEvents.emit(UiAction.NavigateToImagePreview(event.imageUrl))
+                }
         }
     }
 
@@ -78,7 +83,15 @@ class PlantDetailViewModel(
         data class ToggleFavorite(
             val favorite: Boolean,
         ) : UiEvent()
+
+        data class OnImageClick(
+            val imageUrl: String,
+        ) : UiEvent()
     }
 
-    sealed class UiAction
+    sealed class UiAction {
+        data class NavigateToImagePreview(
+            val imageUrl: String,
+        ) : UiAction()
+    }
 }

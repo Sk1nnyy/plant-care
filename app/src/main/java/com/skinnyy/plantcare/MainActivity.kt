@@ -24,6 +24,7 @@ import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigation3.ui.NavDisplay
 import com.skinnyy.plantcare.ui.favorites.FavoritesScreen
 import com.skinnyy.plantcare.ui.home.HomeScreen
+import com.skinnyy.plantcare.ui.imagepreview.ImagePreviewScreen
 import com.skinnyy.plantcare.ui.myplantdetail.MyPlantDetailScreen
 import com.skinnyy.plantcare.ui.myplants.MyPlantsScreen
 import com.skinnyy.plantcare.ui.newplant.NewPlantScreen
@@ -85,7 +86,7 @@ fun PlantCareApp() {
                         }
 
                         entry<PlantDetail> {
-                            PlantDetailScreen(koinViewModel(key = it.id) { parametersOf(it.id) })
+                            PlantDetailScreen(backStack, koinViewModel(key = it.id) { parametersOf(it.id) })
                         }
 
                         entry<Profile> {
@@ -120,6 +121,9 @@ fun PlantCareApp() {
                         }
                         entry<PlantChecker> {
                             PlantCheckerScreen(backStack, viewModel = koinViewModel())
+                        }
+                        entry<ImagePreview> {
+                            ImagePreviewScreen(it.imageUrl)
                         }
                     },
                 transitionSpec = {
@@ -186,3 +190,8 @@ data class PlantPicker(
 
 @Serializable
 data object PlantChecker : NavKey
+
+@Serializable
+data class ImagePreview(
+    val imageUrl: String,
+) : NavKey

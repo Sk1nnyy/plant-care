@@ -46,4 +46,133 @@ data class SpeciesDetail(
     val growth: Growth? = null,
     @SerialName("main_species") val mainSpecies: MainSpecies,
     var isFavorite: Boolean = false,
-)
+) {
+    companion object {
+        val PREVIEW =
+            SpeciesDetail(
+                id = 1,
+                commonName = "European Silver Fir",
+                slug = "abies-alba",
+                scientificName = "Abies alba",
+                year = 1759,
+                bibliography = "Flora Europaea",
+                author = "Philip Miller",
+                status = "accepted",
+                rank = "species",
+                familyCommonName = "Pine family",
+                family =
+                    Family(
+                        id = 10,
+                        name = "Pinaceae",
+                        commonName = "Pine family",
+                        slug = "pinaceae",
+                        links = null,
+                    ),
+                genusId = 20,
+                genus =
+                    Genus(
+                        id = 20,
+                        name = "Abies",
+                        slug = "abies",
+                        links = null,
+                    ),
+                imageUrl = "https://example.com/images/abies_alba.jpg",
+                duration = listOf("perennial"),
+                ediblePart = listOf("leaves"),
+                edible = false,
+                vegetable = false,
+                observations = "Commonly used as a Christmas tree.",
+                commonNames =
+                    mapOf(
+                        "en" to listOf("European silver fir", "Common silver fir"),
+                        "de" to listOf("Weißtanne"),
+                    ),
+                distribution = null,
+                synonyms = listOf("Pinus picea", "Abies picea"),
+                sources =
+                    listOf(
+                        Source(
+                            name = "Example Botanic DB",
+                            url = "https://example.com/species/abies_alba",
+                            citation = "Example Botanic DB, 2024",
+                        ),
+                    ),
+                links =
+                    Links(
+                        self = "https://api.example.com/species/1",
+                        plant = "https://api.example.com/species/1/plant",
+                        genus = "https://api.example.com/genus/20",
+                    ),
+                images =
+                    Images(
+                        leaf =
+                            listOf(
+                                ImageItem(
+                                    imageUrl = "https://example.com/images/abies_alba_leaf.jpg",
+                                ),
+                            ),
+                        bark = emptyList(),
+                        habit =
+                            listOf(
+                                ImageItem(
+                                    imageUrl = "https://example.com/images/abies_alba_leaf.jpg",
+                                ),
+                            ),
+                    ),
+                flower =
+                    Flower(
+                        color = listOf("green", "yellow"),
+                        conspicuous = false,
+                    ),
+                foliage =
+                    Foliage(
+                        color = listOf("green"),
+                        texture = "needles",
+                        leafRetention = false,
+                    ),
+                fruitOrSeed =
+                    FruitOrSeed(
+                        color = listOf("brown"),
+                        conspicuous = false,
+                    ),
+                specifications =
+                    Specifications(
+                        growthHabit = "tree",
+                        growthRate = "slow",
+                        averageHeight = LengthCm(30.0),
+                    ),
+                growth = null,
+                mainSpecies =
+                    MainSpecies(
+                        id = 1,
+                        commonName = "European Silver Fir",
+                        slug = "abies-alba",
+                        scientificName = "Abies alba",
+                        family = "Pinaceae",
+                        imageUrl = "https://example.com/images/abies_alba_default.jpg",
+                        edible = false,
+                        distribution = DistributionSimple(listOf("Portugal, Spain, France, UK, Italy, Greece")),
+                        images =
+                            mapOf(
+                                "leaf" to
+                                    listOf(
+                                        SpeciesImage(id = 0, imageUrl = "https://example.com/images/abies_alba_default.jpg"),
+                                    ),
+                                "bark" to
+                                    listOf(
+                                        SpeciesImage(id = 0, imageUrl = "https://example.com/images/abies_alba_default.jpg"),
+                                    ),
+                                "tree" to
+                                    listOf(
+                                        SpeciesImage(id = 0, imageUrl = "https://example.com/images/abies_alba_default.jpg"),
+                                    ),
+                                "flower" to
+                                    listOf(
+                                        SpeciesImage(id = 0, imageUrl = "https://example.com/images/abies_alba_default.jpg"),
+                                    ),
+                            ),
+                    ),
+                isFavorite = false,
+            )
+    }
+}

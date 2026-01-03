@@ -32,6 +32,8 @@ import com.skinnyy.plantcare.R
 import com.skinnyy.plantcare.db.PersonalPlant
 import com.skinnyy.plantcare.db.PlantWithWateringDates
 import com.skinnyy.plantcare.db.WateringEvent
+import com.skinnyy.plantcare.ui.home.MyPlantWidget
+import com.skinnyy.plantcare.ui.home.NoPlantsWidget
 import com.skinnyy.plantcare.ui.theme.PlantCareTheme
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -62,7 +64,7 @@ private fun MyPlantsContent(
     Scaffold(
         floatingActionButton = {
             FloatingActionButton({ onEvent(MyPlantsViewModel.UiEvent.OnNewPlantClick) }) {
-                Icon(painterResource(R.drawable.ic_favorite), null)
+                Icon(painterResource(R.drawable.ic_add), null)
             }
         },
         topBar = {
@@ -84,8 +86,11 @@ private fun MyPlantsContent(
                     .padding(paddingValues)
                     .padding(16.dp),
         ) {
+            if (uiState.myPlants.isEmpty()) {
+                NoPlantsWidget({ onEvent(MyPlantsViewModel.UiEvent.OnNewPlantClick) })
+            }
             uiState.myPlants.forEach {
-                PlantListItem(it.plant.name, it.plant.imageUrl, { onEvent(MyPlantsViewModel.UiEvent.OnPlantClick(it.plant.id)) })
+                MyPlantWidget(it, { onEvent(MyPlantsViewModel.UiEvent.OnPlantClick(it)) })
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.skinnyy.plantcare.data
 
+import com.skinnyy.plantcare.R
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -36,7 +37,13 @@ data class MainSpecies(
     val synonyms: List<Synonym>? = null,
     val growth: Growth? = null,
     val links: SpeciesLinks? = null,
-)
+) {
+    fun isEdibleLabelRes(): Int =
+        when (edible) {
+            true -> R.string.label_yes
+            else -> R.string.label_no
+        }
+}
 
 @Serializable
 data class SpeciesImage(

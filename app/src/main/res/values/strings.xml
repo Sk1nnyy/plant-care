@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">Plant Care</string>
     <string name="label_see_all">See all</string>
+    <string name="label_yes">Yes</string>
+    <string name="label_no">No</string>
+    <string name="label_unknown">Unknown</string>
+    <string name="label_distribution">Distribution</string>
+    <string name="label_edible">Edible</string>
 </resources>

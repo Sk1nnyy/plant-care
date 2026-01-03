@@ -35,6 +35,12 @@ class FavoritesViewModel(
                     _uiEvents.emit(UiAction.NavigateToPlantDetail(event.id))
                 }
             }
+
+            UiEvent.OnAddPlantClick -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    _uiEvents.emit(UiAction.NavigateToSearch)
+                }
+            }
         }
     }
 
@@ -47,11 +53,15 @@ class FavoritesViewModel(
         data class OnPlantItemClick(
             val id: String,
         ) : UiEvent()
+
+        data object OnAddPlantClick : UiEvent()
     }
 
     sealed class UiAction {
         data class NavigateToPlantDetail(
             val id: String,
         ) : UiAction()
+
+        data object NavigateToSearch : UiAction()
     }
 }

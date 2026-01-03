@@ -100,4 +100,6 @@ dependencies {
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.viewfinder.compose)
     implementation("androidx.work:work-runtime-ktx:2.9.1")
+
+    implementation(libs.telephoto.zoomable.coil)
 }

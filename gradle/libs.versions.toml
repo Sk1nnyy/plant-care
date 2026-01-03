@@ -27,6 +27,7 @@ camerax = "1.6.0-alpha02"
 cameraxViewfinder = "1.0.0-alpha02"
 cameraLifecycle = "1.5.2"
 cameraViewfinder = "1.4.0-alpha07"
+telephoto = "0.18.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -73,6 +74,7 @@ androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.r
 androidx-camera-viewfinder-compose = { module = "androidx.camera:camera-viewfinder-compose", version.ref = "cameraxViewfinder" }
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraLifecycle" }
 androidx-camera-viewfinder = { group = "androidx.camera", name = "camera-viewfinder", version.ref = "cameraViewfinder" }
+telephoto-zoomable-coil = { group = "me.saket.telephoto", name = "zoomable-image-coil3", version.ref = "telephoto" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -1,12 +1,9 @@
 package com.skinnyy.plantcare.ui.favorites
 
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -26,8 +23,10 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import com.skinnyy.plantcare.PlantDetail
 import com.skinnyy.plantcare.R
+import com.skinnyy.plantcare.Search
 import com.skinnyy.plantcare.db.FavoritePlant
-import com.skinnyy.plantcare.ui.search.RemoteImage
+import com.skinnyy.plantcare.ui.home.FavoritePlantWidget
+import com.skinnyy.plantcare.ui.home.NoFavoritePlantsWidget
 import com.skinnyy.plantcare.ui.theme.PlantCareTheme
 import org.koin.androidx.compose.koinViewModel
 
@@ -41,8 +40,15 @@ internal fun FavoritesScreen(
     val uiAction = viewModel.uiEvents.collectAsState(null).value
     LaunchedEffect(uiAction) {
         when (uiAction) {
-            is FavoritesViewModel.UiAction.NavigateToPlantDetail -> navController.add(PlantDetail(uiAction.id))
+            is FavoritesViewModel.UiAction.NavigateToPlantDetail ->
+                navController.add(
+                    PlantDetail(
+                        uiAction.id,
+                    ),
+                )
+
             null -> {}
+            FavoritesViewModel.UiAction.NavigateToSearch -> navController.add(Search)
         }
     }
     FavoritesContent(uiState = uiState, modifier = modifier, onEvent = { viewModel.onEvent(it) })
@@ -77,13 +83,16 @@ private fun FavoritesContent(
                     .padding(paddingValues)
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(48.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            if (uiState.plants.isEmpty()) {
+                NoFavoritePlantsWidget({ onEvent(FavoritesViewModel.UiEvent.OnAddPlantClick) })
+            }
             uiState.plants.forEach {
-                Row(modifier = Modifier.clickable { onEvent(FavoritesViewModel.UiEvent.OnPlantItemClick(it.id.toString())) }) {
-                    RemoteImage(it.imageUrl, modifier = Modifier.size(128.dp))
-                    Text(it.scientificName)
-                }
+                FavoritePlantWidget(
+                    it,
+                    { onEvent(FavoritesViewModel.UiEvent.OnPlantItemClick(it.toString())) },
+                )
             }
         }
     }
@@ -93,6 +102,12 @@ private fun FavoritesContent(
 @Composable
 private fun FavoritesScreenPreview() {
     PlantCareTheme {
-        FavoritesContent(FavoritesViewModel.UiState(false, listOf(FavoritePlant(0, "Monstera", "www.image.com", 199998L))), {})
+        FavoritesContent(
+            FavoritesViewModel.UiState(
+                false,
+                listOf(FavoritePlant(0, "Monstera", "www.image.com", 199998L)),
+            ),
+            {},
+        )
     }
 }

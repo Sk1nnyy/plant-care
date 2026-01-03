@@ -44,6 +44,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -186,7 +187,7 @@ private fun HomeContent(
                                     it.favoritePlants.forEach {
                                         FavoritePlantWidget(
                                             favoritePlant = it,
-                                            onEvent = onEvent,
+                                            onClick = { onEvent(HomeViewModel.UiEvent.OnFavoritePlantClick(it)) },
                                             modifier = Modifier.padding(horizontal = 16.dp),
                                         )
                                     }
@@ -202,7 +203,9 @@ private fun HomeContent(
                                     it.plants.forEach {
                                         MyPlantWidget(
                                             it,
-                                            onEvent = onEvent,
+                                            onClick = {
+                                                onEvent(HomeViewModel.UiEvent.OnMyPlantClick(it))
+                                            },
                                             modifier = Modifier.padding(horizontal = 16.dp),
                                         )
                                     }
@@ -215,21 +218,28 @@ private fun HomeContent(
                                         modifier = Modifier.padding(horizontal = 16.dp),
                                     )
 
-                                    NoPlantsWidget(onEvent)
+                                    NoPlantsWidget({ onEvent(HomeViewModel.UiEvent.OnNewPlantClick) })
                                 }
 
                                 HomeWidget.Search ->
-                                    SearchBar(
-                                        {},
-                                        modifier =
-                                            Modifier
-                                                .sharedElement(
-                                                    sharedContentState = rememberSharedContentState("searchBar"),
-                                                    animatedVisibilityScope = animatedContentScope,
-                                                ).padding(horizontal = 16.dp)
-                                                .clickable { onEvent(HomeViewModel.UiEvent.OnSearchClick) },
-                                        readOnly = true,
-                                    )
+                                    Column(
+                                        Modifier
+                                            .padding(horizontal = 16.dp),
+                                    ) {
+                                        SearchBar(
+                                            {},
+                                            modifier =
+                                                Modifier
+                                                    .sharedElement(
+                                                        sharedContentState =
+                                                            rememberSharedContentState(
+                                                                "searchBar",
+                                                            ),
+                                                        animatedVisibilityScope = animatedContentScope,
+                                                    ).clickable { onEvent(HomeViewModel.UiEvent.OnSearchClick) },
+                                            readOnly = true,
+                                        )
+                                    }
 
                                 HomeWidget.NoFavorites -> {
                                     SectionHeader(
@@ -237,7 +247,7 @@ private fun HomeContent(
                                         onSeeAll = { onEvent(HomeViewModel.UiEvent.OnSeeAllFavoritesClick) },
                                         modifier = Modifier.padding(horizontal = 16.dp),
                                     )
-                                    NoFavoritePlantsWidget(onEvent)
+                                    NoFavoritePlantsWidget({ onEvent(HomeViewModel.UiEvent.OnSearchClick) })
                                 }
                             }
                         }
@@ -324,7 +334,7 @@ private fun SectionHeaderPreview() {
 @Composable
 fun MyPlantWidget(
     myPlant: PlantWithWateringDates,
-    onEvent: (HomeViewModel.UiEvent) -> Unit,
+    onClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(modifier = modifier) {
@@ -332,7 +342,7 @@ fun MyPlantWidget(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .clickable { onEvent(HomeViewModel.UiEvent.OnMyPlantClick(myPlant.plant.id)) },
+                    .clickable { onClick(myPlant.plant.id) },
         ) {
             Box(
                 modifier =
@@ -343,7 +353,9 @@ fun MyPlantWidget(
             ) {
                 RemoteImage(
                     myPlant.plant.imageUrl,
-                    modifier.fillMaxSize(),
+                    Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(8.dp)),
                     contentScale = ContentScale.Crop,
                 )
             }
@@ -383,7 +395,7 @@ private fun MyPlantWidgetPreview() {
 
 @Composable
 fun NoPlantsWidget(
-    onEvent: (HomeViewModel.UiEvent) -> Unit,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -393,7 +405,7 @@ fun NoPlantsWidget(
     ) {
         Image(painterResource(R.drawable.ic_watering_plants), contentDescription = null)
         Text("No plants yet!", style = MaterialTheme.typography.titleMedium)
-        Button(onClick = { onEvent(HomeViewModel.UiEvent.OnNewPlantClick) }) {
+        Button(onClick = { onClick() }) {
             Text("Add a plant")
         }
     }
@@ -409,7 +421,7 @@ private fun NoPlantsWidgetPreview() {
 
 @Composable
 fun NoFavoritePlantsWidget(
-    onEvent: (HomeViewModel.UiEvent) -> Unit,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -419,7 +431,7 @@ fun NoFavoritePlantsWidget(
     ) {
         Image(painterResource(R.drawable.ic_plant_love), contentDescription = null)
         Text("No favorite plants yet!", style = MaterialTheme.typography.titleMedium)
-        Button(onClick = { onEvent(HomeViewModel.UiEvent.OnSearchClick) }) {
+        Button(onClick = { onClick() }) {
             Text("Find a plant")
         }
     }
@@ -436,7 +448,7 @@ private fun NoFavoriteWidgetPreview() {
 @Composable
 fun FavoritePlantWidget(
     favoritePlant: FavoritePlant,
-    onEvent: (HomeViewModel.UiEvent) -> Unit,
+    onClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(modifier = modifier) {
@@ -444,18 +456,19 @@ fun FavoritePlantWidget(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .clickable { onEvent(HomeViewModel.UiEvent.OnFavoritePlantClick(favoritePlant.id)) },
+                    .clickable { onClick(favoritePlant.id) },
         ) {
             Box(
                 modifier =
                     Modifier
                         .padding(6.dp)
-                        .size(96.dp)
-                        .background(MaterialTheme.colorScheme.onSurface, RoundedCornerShape(8.dp)),
+                        .size(96.dp),
             ) {
                 RemoteImage(
                     favoritePlant.imageUrl,
-                    modifier.fillMaxSize(),
+                    Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(8.dp)),
                     contentScale = ContentScale.Crop,
                 )
             }

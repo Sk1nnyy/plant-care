@@ -5,14 +5,15 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -35,6 +36,7 @@ import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -54,6 +56,8 @@ import com.skinnyy.plantcare.PlantDetail
 import com.skinnyy.plantcare.R
 import com.skinnyy.plantcare.data.Species
 import com.skinnyy.plantcare.ui.theme.PlantCareTheme
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -107,40 +111,62 @@ private fun SearchScreenContent(
             Column(
                 modifier =
                     Modifier
-                        .padding(paddingValues)
-                        .padding(16.dp),
+                        .padding(paddingValues),
             ) {
-                SearchBar(
-                    {
-                        onEvent(
-                            SearchViewModel.UiEvent.QueryChanged(it),
-                        )
-                    },
+                Column(
                     modifier =
-                        Modifier.sharedElement(
-                            sharedContentState = rememberSharedContentState("searchBar"),
-                            animatedVisibilityScope = animatedContentScope,
-                        ),
-                )
+                        Modifier
+                            .padding(16.dp),
+                ) {
+                    SearchBar(
+                        {
+                            onEvent(
+                                SearchViewModel.UiEvent.QueryChanged(it),
+                            )
+                        },
+                        modifier =
+                            Modifier
+                                .sharedElement(
+                                    sharedContentState = rememberSharedContentState("searchBar"),
+                                    animatedVisibilityScope = animatedContentScope,
+                                ),
+                    )
+                }
 
                 LazyVerticalGrid(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
                     columns = GridCells.Fixed(2),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     if (uiState.query.isBlank() && !uiState.isLoading) {
                         item(span = { GridItemSpan(2) }) {
-                            Text(
-                                "Type something !",
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 16.dp),
-                            )
+                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Column(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 64.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                                ) {
+                                    Image(
+                                        painterResource(R.drawable.ic_plant_search),
+                                        contentDescription = null,
+                                    )
+                                    Text(
+                                        "Type something !",
+                                        style = MaterialTheme.typography.headlineMedium,
+                                        modifier =
+                                            Modifier
+                                                .padding(vertical = 16.dp),
+                                    )
+                                }
+                            }
                         }
                     }
 
-                    item(span = { GridItemSpan(2) }) { Spacer(Modifier.height(16.dp)) }
                     items(uiState.species) { specie ->
 
                         PlantListItem(
@@ -173,7 +199,7 @@ private fun SearchScreenContent(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
 fun SearchBar(
     onSearch: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -190,6 +216,9 @@ fun SearchBar(
 ) {
     val searchBarState = rememberSearchBarState()
     val textFieldState = rememberTextFieldState()
+    LaunchedEffect(Unit) {
+        snapshotFlow { textFieldState.text }.debounce { 300 }.collect { if (it.isNotBlank()) onSearch(it.toString()) }
+    }
     Box {
         SearchBar(
             state = searchBarState,
