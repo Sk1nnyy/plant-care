@@ -1,11 +1,14 @@
 package com.skinnyy.plantcare.ui.newplant
 
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.input.rememberTextFieldState
@@ -27,10 +30,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
@@ -40,12 +46,10 @@ import com.skinnyy.plantcare.NewPlant
 import com.skinnyy.plantcare.PlantChecker
 import com.skinnyy.plantcare.PlantPicker
 import com.skinnyy.plantcare.R
-import com.skinnyy.plantcare.db.PersonalPlant
-import com.skinnyy.plantcare.db.PlantWithWateringDates
-import com.skinnyy.plantcare.db.WateringEvent
 import com.skinnyy.plantcare.ui.theme.PlantCareTheme
 import com.skinnyy.plantcare.utils.LocalResultEventBus
 import com.skinnyy.plantcare.utils.ResultEffect
+import kotlinx.serialization.Serializable
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -82,6 +86,43 @@ private fun NewPlantContent(
     onEvent: (NewPlantsViewModel.UiEvent) -> Unit,
 ) {
     val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+    var wateringScheduleType by rememberSaveable { mutableStateOf(WateringScheduleType.None) }
+    var isDropdownExpanded by remember { mutableStateOf(false) }
+    val selectedDaysOfTheWeek = rememberSaveable { mutableStateListOf<DayOfTheWeek>() }
+    var currentStep by rememberSaveable { mutableStateOf(NewPlantStep.Name) }
+
+    val plantNameTextFieldState = rememberTextFieldState()
+    val isContinueEnabled by remember(
+        uiState.species,
+        currentStep,
+        plantNameTextFieldState.text,
+        wateringScheduleType,
+        selectedDaysOfTheWeek,
+    ) {
+        mutableStateOf(
+            currentStep == NewPlantStep.Name &&
+                plantNameTextFieldState.text.isNotEmpty() ||
+                currentStep == NewPlantStep.Type &&
+                uiState.species != null ||
+                currentStep == NewPlantStep.Schedule &&
+                plantNameTextFieldState.text.isNotEmpty() &&
+                uiState.species != null &&
+                (
+                    wateringScheduleType == WateringScheduleType.None ||
+                        wateringScheduleType == WateringScheduleType.Daily ||
+                        (
+                            wateringScheduleType != WateringScheduleType.None &&
+                                wateringScheduleType != WateringScheduleType.Daily &&
+                                selectedDaysOfTheWeek.isNotEmpty()
+                        )
+                ),
+        )
+    }
+    LaunchedEffect(uiState.species) {
+        if (uiState.species != null && !currentStep.isGreaterThan(NewPlantStep.Type)) {
+            currentStep = currentStep.next()
+        }
+    }
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -96,145 +137,142 @@ private fun NewPlantContent(
             )
         },
     ) { paddingValues ->
-        Column(
-            modifier =
-                Modifier
-                    .padding(paddingValues)
-                    .padding(16.dp),
+        Box(
+            Modifier
+                .padding(paddingValues)
+                .fillMaxSize(),
         ) {
-            Text("What is the name of your plant?")
-            val plantNameTextFieldState = rememberTextFieldState()
-            TextField(plantNameTextFieldState, label = { Text("Email") })
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier =
+                    Modifier
+                        .padding(16.dp),
+            ) {
+                Text("What is the name of your plant?")
+                TextField(plantNameTextFieldState, label = { Text("Leafy") })
 
-            Text("What is the type of your plant?")
+                AnimatedVisibility(currentStep.isGreaterThan(NewPlantStep.Name)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("What is the type of your plant?")
 
-            Card {
-                Row(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .clickable { onEvent(NewPlantsViewModel.UiEvent.OnPickType) }
-                            .padding(16.dp),
-                ) {
-                    uiState.species?.let {
-                        Text("${it.scientificName}")
-                    } ?: run {
-                        Text("Pick the type")
-                    }
-                }
-            }
-
-            Card {
-                Row(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .clickable { onEvent(NewPlantsViewModel.UiEvent.OnPlantScan) }
-                            .padding(16.dp),
-                ) {
-                    uiState.species?.let {
-                        Text("${it.scientificName}")
-                    } ?: run {
-                        Text("Scan your plant")
-                    }
-                }
-            }
-
-            Text("Do you want to set a schedule for watering?")
-
-            var wateringScheduleType by remember { mutableStateOf(WateringScheduleType.None) }
-            var isDropdownExpanded by remember { mutableStateOf(false) }
-            val selectedDaysOfTheWeek = remember { mutableStateListOf<DayOfTheWeek>() }
-            val isContinueEnabled by remember(plantNameTextFieldState, wateringScheduleType, selectedDaysOfTheWeek) {
-                mutableStateOf(
-                    plantNameTextFieldState.text.isNotEmpty() &&
-                        uiState.species != null &&
-                        (
-                            wateringScheduleType == WateringScheduleType.None ||
-                                wateringScheduleType == WateringScheduleType.Daily ||
-                                (
-                                    wateringScheduleType != WateringScheduleType.None &&
-                                        wateringScheduleType != WateringScheduleType.Daily &&
-                                        selectedDaysOfTheWeek.isNotEmpty()
-                                )
-                        ),
-                )
-            }
-            LaunchedEffect(wateringScheduleType) {
-                selectedDaysOfTheWeek.clear()
-            }
-            Card(modifier = Modifier.clickable { isDropdownExpanded = true }) {
-                Text(
-                    wateringScheduleType.name,
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                )
-                DropdownMenu(
-                    isDropdownExpanded,
-                    onDismissRequest = { isDropdownExpanded = false },
-                ) {
-                    WateringScheduleType.entries.forEach {
-                        DropdownMenuItem(
-                            text = {
-                                Text("${it.name}")
-                            },
-                            onClick = {
-                                wateringScheduleType = it
-                                isDropdownExpanded = false
-                            },
-                        )
-                    }
-                }
-            }
-
-            if (wateringScheduleType.requiresWeekdaySelection()) {
-                Row(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    DayOfTheWeek.entries.forEach { dayOfTheWeek ->
-                        Card(
-                            modifier =
-                                Modifier.clickable {
-                                    if (wateringScheduleType.allowsMultipleSelection()) {
-                                        if (selectedDaysOfTheWeek.contains(dayOfTheWeek)) {
-                                            selectedDaysOfTheWeek.remove(dayOfTheWeek)
-                                        } else {
-                                            selectedDaysOfTheWeek.add(dayOfTheWeek)
-                                        }
-                                    } else {
-                                        selectedDaysOfTheWeek.clear()
-                                        selectedDaysOfTheWeek.add(dayOfTheWeek)
+                        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                            Card(Modifier.weight(1f)) {
+                                Row(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .clickable { onEvent(NewPlantsViewModel.UiEvent.OnPickType) }
+                                            .padding(16.dp),
+                                ) {
+                                    uiState.species?.let {
+                                        Text("${it.scientificName}")
+                                    } ?: run {
+                                        Text("Pick the type")
                                     }
-                                },
-                            border =
-                                if (selectedDaysOfTheWeek.contains(dayOfTheWeek)) {
-                                    BorderStroke(
-                                        1.dp,
-                                        Color.Green,
+                                }
+                            }
+
+                            IconButton({ onEvent(NewPlantsViewModel.UiEvent.OnPlantScan) }) {
+                                Icon(painter = painterResource(R.drawable.ic_add), null)
+                            }
+                        }
+                    }
+                }
+                AnimatedVisibility(currentStep.isGreaterThan(NewPlantStep.Type)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("Do you want to set a schedule for watering?")
+
+                        LaunchedEffect(wateringScheduleType) {
+                            selectedDaysOfTheWeek.clear()
+                        }
+                        Card(modifier = Modifier.clickable { isDropdownExpanded = true }) {
+                            Text(
+                                wateringScheduleType.name,
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                            )
+                            DropdownMenu(
+                                isDropdownExpanded,
+                                onDismissRequest = { isDropdownExpanded = false },
+                            ) {
+                                WateringScheduleType.entries.forEach {
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(it.name)
+                                        },
+                                        onClick = {
+                                            wateringScheduleType = it
+                                            isDropdownExpanded = false
+                                        },
                                     )
-                                } else {
-                                    null
-                                },
-                        ) {
-                            Text("${dayOfTheWeek.name.take(3)}", modifier = Modifier.padding(8.dp))
+                                }
+                            }
+                        }
+
+                        if (wateringScheduleType.requiresWeekdaySelection()) {
+                            Text("What are the day(s)?")
+
+                            Row(
+                                Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            ) {
+                                DayOfTheWeek.entries.forEach { dayOfTheWeek ->
+                                    Card(
+                                        modifier =
+                                            Modifier.weight(1f).clickable {
+                                                if (wateringScheduleType.allowsMultipleSelection()) {
+                                                    if (selectedDaysOfTheWeek.contains(dayOfTheWeek)) {
+                                                        selectedDaysOfTheWeek.remove(dayOfTheWeek)
+                                                    } else {
+                                                        selectedDaysOfTheWeek.add(dayOfTheWeek)
+                                                    }
+                                                } else {
+                                                    selectedDaysOfTheWeek.clear()
+                                                    selectedDaysOfTheWeek.add(dayOfTheWeek)
+                                                }
+                                            },
+                                        border =
+                                            if (selectedDaysOfTheWeek.contains(dayOfTheWeek)) {
+                                                BorderStroke(
+                                                    1.dp,
+                                                    Color.Green,
+                                                )
+                                            } else {
+                                                null
+                                            },
+                                    ) {
+                                        Text(
+                                            dayOfTheWeek.name.take(3),
+                                            modifier = Modifier.fillMaxWidth().padding(8.dp),
+                                            textAlign = TextAlign.Center,
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
-
-            Button(onClick = {
-                onEvent(
-                    NewPlantsViewModel.UiEvent.OnCreateClick(
-                        plantNameTextFieldState.text.toString(),
-                        wateringScheduleType,
-                        selectedDaysOfTheWeek,
-                    ),
-                )
-            }, enabled = isContinueEnabled) {
-                Text("Create")
+            Button(
+                modifier = Modifier.align(Alignment.BottomCenter).padding(24.dp),
+                onClick = {
+                    if (currentStep == NewPlantStep.Schedule) {
+                        onEvent(
+                            NewPlantsViewModel.UiEvent.OnCreateClick(
+                                plantNameTextFieldState.text.toString(),
+                                wateringScheduleType,
+                                selectedDaysOfTheWeek,
+                            ),
+                        )
+                    } else {
+                        currentStep = currentStep.next()
+                    }
+                },
+                enabled = isContinueEnabled,
+            ) {
+                Text(if (currentStep == NewPlantStep.Schedule) "Create" else "Continue")
             }
         }
     }
@@ -243,73 +281,37 @@ private fun NewPlantContent(
 @Preview
 @Composable
 private fun NewPlantPreview() {
-    val dummyPlantWithWateringDates =
-        PlantWithWateringDates(
-            plant =
-                PersonalPlant(
-                    id = 1,
-                    plantId = 12,
-                    name = "Monstera",
-                    scientificName = "Monstera Deliciosa",
-                    imageUrl = "www.google.com",
-                ),
-            wateringDates =
-                listOf(
-                    WateringEvent(
-                        id = 1,
-                        plantId = 1,
-                        wateredDate = "2025-01-01",
-                    ),
-                    WateringEvent(
-                        id = 2,
-                        plantId = 1,
-                        wateredDate = "2025-01-10",
-                    ),
-                    WateringEvent(
-                        id = 3,
-                        plantId = 1,
-                        wateredDate = "2025-01-20",
-                    ),
-                ),
-        )
     PlantCareTheme {
         NewPlantContent(
             NewPlantsViewModel.UiState(
                 isLoading = false,
             ),
-            {},
-        )
+        ) {}
     }
 }
 
+@Serializable
 sealed class WateringSchedule {
+    @Serializable
+    data object None : WateringSchedule()
+
+    @Serializable
     data object Daily : WateringSchedule()
 
+    @Serializable
     data class Weekly(
         val dayOfTheWeek: DayOfTheWeek,
     ) : WateringSchedule()
 
+    @Serializable
     data class Monthly(
         val dayOfTheWeek: DayOfTheWeek,
     ) : WateringSchedule()
 
+    @Serializable
     data class MultipleDaysInWeek(
         val daysOfTheWeek: List<DayOfTheWeek>,
     ) : WateringSchedule()
-}
-
-enum class WateringScheduleType {
-    None,
-    Daily,
-    Weekly,
-    Monthly,
-    MultipleDaysInWeek,
-    ;
-
-    fun requiresWeekdaySelection() =
-        this == WateringScheduleType.Weekly || this == WateringScheduleType.Monthly || this == WateringScheduleType.MultipleDaysInWeek
-
-    fun allowsMultipleSelection() = this == WateringScheduleType.MultipleDaysInWeek
 }
 
 enum class DayOfTheWeek {
@@ -320,4 +322,33 @@ enum class DayOfTheWeek {
     Friday,
     Saturday,
     Sunday,
+}
+
+enum class WateringScheduleType {
+    None,
+    Daily,
+    Weekly,
+    Monthly,
+    MultipleDaysInWeek,
+    ;
+
+    fun requiresWeekdaySelection() = this == Weekly || this == Monthly || this == MultipleDaysInWeek
+
+    fun allowsMultipleSelection() = this == MultipleDaysInWeek
+}
+
+enum class NewPlantStep {
+    Name,
+    Type,
+    Schedule,
+    ;
+
+    fun isGreaterThan(other: NewPlantStep): Boolean = this.ordinal > other.ordinal
+
+    fun next() =
+        when (this) {
+            Name -> Type
+            Type -> Schedule
+            Schedule -> Schedule
+        }
 }

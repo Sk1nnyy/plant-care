@@ -1,21 +1,19 @@
 package com.skinnyy.plantcare.ui.plantpicker
 
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,29 +21,22 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
-import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
-import coil3.request.error
-import coil3.request.placeholder
 import com.skinnyy.plantcare.PlantPicker
 import com.skinnyy.plantcare.R
 import com.skinnyy.plantcare.data.Species
+import com.skinnyy.plantcare.ui.search.PlantListItem
+import com.skinnyy.plantcare.ui.search.SearchBar
 import com.skinnyy.plantcare.ui.theme.PlantCareTheme
 import com.skinnyy.plantcare.utils.LocalResultEventBus
 import org.koin.compose.viewmodel.koinViewModel
@@ -84,7 +75,7 @@ private fun PlantPickerContent(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    Text("Choose a plant")
+                    Text("Search")
                 },
                 navigationIcon = {
                     IconButton(onClick = { onBackPressedDispatcher?.onBackPressed() }) {
@@ -97,47 +88,56 @@ private fun PlantPickerContent(
         Column(
             modifier =
                 Modifier
-                    .padding(paddingValues)
-                    .padding(16.dp),
+                    .padding(paddingValues),
         ) {
-            val searchBarState = rememberSearchBarState()
-            val textFieldState = rememberTextFieldState()
-            SearchBar(
-                state = searchBarState,
-                inputField = {
-                    SearchBarDefaults.InputField(
-                        textFieldState = textFieldState,
-                        searchBarState = searchBarState,
-                        onSearch = {
-                            onEvent(
-                                PlantPickerViewModel.UiEvent.QueryChanged(
-                                    textFieldState.text,
-                                ),
-                            )
-                        },
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(),
-            )
+            Column(
+                modifier =
+                    Modifier
+                        .padding(16.dp),
+            ) {
+                SearchBar(
+                    {
+                        PlantPickerViewModel.UiEvent.QueryChanged(
+                            it,
+                        )
+                    },
+                )
+            }
 
             LazyVerticalGrid(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
                 columns = GridCells.Fixed(2),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 if (uiState.query.isBlank() && !uiState.isLoading) {
                     item(span = { GridItemSpan(2) }) {
-                        Text(
-                            "Type something !",
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 16.dp),
-                        )
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Column(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 64.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(16.dp),
+                            ) {
+                                Image(
+                                    painterResource(R.drawable.ic_plant_search),
+                                    contentDescription = null,
+                                )
+                                Text(
+                                    "Type something !",
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    modifier =
+                                        Modifier
+                                            .padding(vertical = 16.dp),
+                                )
+                            }
+                        }
                     }
                 }
 
-                item(span = { GridItemSpan(2) }) { Spacer(Modifier.height(16.dp)) }
                 items(uiState.species) { specie ->
 
                     PlantListItem(
@@ -182,66 +182,6 @@ private fun PlantPickerScreenPreview() {
                     ),
                 query = "Monst",
             ),
-            {},
-        )
+        ) {}
     }
-}
-
-@Composable
-internal fun PlantListItem(
-    name: String,
-    imageUrl: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Card {
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .clickable { onClick() }
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            RemoteImage(
-                imageUrl,
-                modifier.size(64.dp),
-            )
-
-            Text(
-                name,
-                style = MaterialTheme.typography.titleMedium,
-                textAlign = TextAlign.Center,
-                maxLines = 2,
-                minLines = 2,
-            )
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun PlantListItemPreview() {
-    PlantCareTheme {
-        PlantListItem("Monstera", "www.google.com", {})
-    }
-}
-
-@Composable
-internal fun RemoteImage(
-    url: String,
-    modifier: Modifier = Modifier,
-) {
-    val context = LocalContext.current
-    AsyncImage(
-        model =
-            ImageRequest
-                .Builder(context)
-                .placeholder(R.drawable.ic_search)
-                .error(R.drawable.ic_search)
-                .data(url)
-                .build(),
-        contentDescription = null,
-        modifier = modifier,
-    )
 }

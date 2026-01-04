@@ -49,6 +49,14 @@ class NewPlantsViewModel(
             is UiEvent.OnCreateClick -> {
                 viewModelScope.launch(Dispatchers.IO) {
                     val species = _uiState.value.species ?: return@launch
+                    val wateringSchedule =
+                        when (event.scheduleType) {
+                            WateringScheduleType.None -> WateringSchedule.None
+                            WateringScheduleType.Daily -> WateringSchedule.Daily
+                            WateringScheduleType.Weekly -> WateringSchedule.Weekly(event.scheduleDays[0])
+                            WateringScheduleType.Monthly -> WateringSchedule.Monthly(event.scheduleDays[0])
+                            WateringScheduleType.MultipleDaysInWeek -> WateringSchedule.MultipleDaysInWeek(event.scheduleDays)
+                        }
                     val plant =
                         PersonalPlant(
                             0,
@@ -56,6 +64,7 @@ class NewPlantsViewModel(
                             scientificName = species.scientificName.orEmpty(),
                             name = event.plantName,
                             imageUrl = species.imageUrl.orEmpty(),
+                            wateringSchedule = wateringSchedule,
                         )
                     val id = personalPlantsRepository.insert(plant)
                     _uiEvents.emit(UiAction.GoToPlantDetail(id.toInt()))

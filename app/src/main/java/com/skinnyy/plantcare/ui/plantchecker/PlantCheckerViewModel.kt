@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Firebase
 import com.google.firebase.functions.functions
-import com.skinnyy.plantcare.data.SpeciesDetail
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -15,7 +14,7 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.Serializable
 
 class PlantCheckerViewModel : ViewModel() {
-    private val _uiState: MutableStateFlow<UiState> = MutableStateFlow(UiState(true, null))
+    private val _uiState: MutableStateFlow<UiState> = MutableStateFlow(UiState(false, false))
     val uiState: StateFlow<UiState> = _uiState
 
     private val _uiEvents: MutableSharedFlow<UiAction> = MutableSharedFlow()
@@ -25,33 +24,53 @@ class PlantCheckerViewModel : ViewModel() {
         when (event) {
             is UiEvent.OnPictureTaken -> {
                 viewModelScope.launch {
-                    val base64 = bitmapToBase64(event.bitmap)
-                    val data = hashMapOf("image" to base64)
+                    val result =
+                        runCatching {
+                            _uiState.emit(_uiState.value.copy(isLoading = true))
+                            val base64 = bitmapToBase64(event.bitmap)
+                            val data = hashMapOf("image" to base64)
 
-                    val response =
-                        Firebase
-                            .functions("europe-west1")
-                            .getHttpsCallable("identifyPlant")
-                            .call(data)
-                            .await()
+                            val response =
+                                Firebase
+                                    .functions("europe-west1")
+                                    .getHttpsCallable("identifyPlant")
+                                    .call(data)
+                                    .await()
 
-                    val raw = response.data as Map<*, *>
-                    val result = raw["results"] as List<Map<*, *>>
-                    val identifiedPlants =
-                        result.map {
-                            val score = it["score"] as Double
-                            val scientificNameWithoutAuthor =
-                                it["scientificName"] as? String
-                            val commonNames = it["commonNames"] as? List<String>
-                            val images = it["images"] as? List<String>
-                            IdentifiedPlant(
-                                score,
-                                scientificNameWithoutAuthor.orEmpty(),
-                                commonNames.orEmpty(),
-                                images.orEmpty(),
-                            )
+                            val raw = response.data as Map<*, *>
+                            val result = raw["results"] as List<Map<*, *>>
+                            val identifiedPlants =
+                                result.map {
+                                    val score = it["score"] as Double
+                                    val scientificNameWithoutAuthor =
+                                        it["scientificName"] as? String
+                                    val commonNames = it["commonNames"] as? List<String>
+                                    val images = it["images"] as? List<String>
+                                    IdentifiedPlant(
+                                        score,
+                                        scientificNameWithoutAuthor.orEmpty(),
+                                        commonNames.orEmpty(),
+                                        images.orEmpty(),
+                                    )
+                                }
+                            val speciesName =
+                                identifiedPlants.firstOrNull { it.scientificNameWithoutAuthor.isNotBlank() }
+                            if (speciesName != null) {
+                                _uiEvents.emit(UiAction.GoToPlantPicker(identifiedPlants.first().scientificNameWithoutAuthor))
+                            } else {
+                                _uiState.emit(_uiState.value.copy(isLoading = false, error = true))
+                            }
                         }
-                    _uiEvents.emit(UiAction.GoToPlantPicker(identifiedPlants.first().scientificNameWithoutAuthor))
+
+                    if (result.isFailure) {
+                        _uiState.emit(_uiState.value.copy(isLoading = false, error = true))
+                    }
+                }
+            }
+
+            UiEvent.DismissError -> {
+                viewModelScope.launch {
+                    _uiState.emit(_uiState.value.copy(error = false))
                 }
             }
         }
@@ -66,14 +85,15 @@ class PlantCheckerViewModel : ViewModel() {
 
     data class UiState(
         val isLoading: Boolean,
-        val species: SpeciesDetail? = null,
-        val favorite: Boolean = false,
+        val error: Boolean = false,
     )
 
     sealed class UiEvent {
         data class OnPictureTaken(
             val bitmap: Bitmap,
         ) : UiEvent()
+
+        data object DismissError : UiEvent()
     }
 
     sealed class UiAction {

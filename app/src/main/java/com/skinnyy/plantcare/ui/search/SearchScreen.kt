@@ -36,9 +36,12 @@ import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -92,7 +95,11 @@ private fun SearchScreenContent(
     animatedContentScope: AnimatedVisibilityScope,
     onEvent: (SearchViewModel.UiEvent) -> Unit,
 ) {
+    val focusRequest = remember { FocusRequester() }
     val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+    LaunchedEffect(Unit) {
+        focusRequest.requestFocus()
+    }
     with(sharedTransitionScope) {
         Scaffold(
             topBar = {
@@ -129,7 +136,7 @@ private fun SearchScreenContent(
                                 .sharedElement(
                                     sharedContentState = rememberSharedContentState("searchBar"),
                                     animatedVisibilityScope = animatedContentScope,
-                                ),
+                                ).focusRequester(focusRequest),
                     )
                 }
 

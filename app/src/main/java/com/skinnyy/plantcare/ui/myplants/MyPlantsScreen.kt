@@ -34,6 +34,7 @@ import com.skinnyy.plantcare.db.PlantWithWateringDates
 import com.skinnyy.plantcare.db.WateringEvent
 import com.skinnyy.plantcare.ui.home.MyPlantWidget
 import com.skinnyy.plantcare.ui.home.NoPlantsWidget
+import com.skinnyy.plantcare.ui.newplant.WateringSchedule
 import com.skinnyy.plantcare.ui.theme.PlantCareTheme
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -108,6 +109,7 @@ private fun MyPlantsPreview() {
                     name = "Monstera",
                     scientificName = "Monstera Deliciosa",
                     imageUrl = "www.google.com",
+                    wateringSchedule = WateringSchedule.Daily,
                 ),
             wateringDates =
                 listOf(

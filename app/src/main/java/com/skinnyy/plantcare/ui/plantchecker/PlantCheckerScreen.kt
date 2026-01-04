@@ -1,6 +1,12 @@
 package com.skinnyy.plantcare.ui.plantchecker
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -10,13 +16,24 @@ import androidx.camera.viewfinder.compose.Viewfinder
 import androidx.camera.viewfinder.surface.ImplementationMode
 import androidx.camera.viewfinder.surface.TransformationInfo
 import androidx.camera.viewfinder.surface.ViewfinderSurfaceRequest
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,13 +44,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import com.skinnyy.plantcare.PlantPicker
+import com.skinnyy.plantcare.R
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.util.concurrent.Executor
@@ -44,6 +66,7 @@ fun PlantCheckerScreen(
     modifier: Modifier = Modifier,
     viewModel: PlantCheckerViewModel = koinViewModel(),
 ) {
+    val uiState = viewModel.uiState.collectAsState().value
     val uiAction = viewModel.uiEvents.collectAsState(null).value
     LaunchedEffect(uiAction) {
         when (uiAction) {
@@ -53,20 +76,47 @@ fun PlantCheckerScreen(
             }
         }
     }
-    CameraScreen(onEvent = { viewModel.onEvent(it) })
+    CameraScreen(uiState, onEvent = { viewModel.onEvent(it) })
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CameraScreen(onEvent: (PlantCheckerViewModel.UiEvent) -> Unit) {
+fun CameraScreen(
+    uiState: PlantCheckerViewModel.UiState,
+    onEvent: (PlantCheckerViewModel.UiEvent) -> Unit,
+) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
     var surfaceRequest by remember { mutableStateOf<ViewfinderSurfaceRequest?>(null) }
     var imageCapture by remember { mutableStateOf<ImageCapture?>(null) }
-    var captureStatus by remember { mutableStateOf("Ready") }
     var transformationInfo by remember { mutableStateOf<TransformationInfo?>(null) }
+    val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
     val executor = remember { ContextCompat.getMainExecutor(context) }
+    var hasCameraPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.CAMERA,
+            ) == PackageManager.PERMISSION_GRANTED,
+        )
+    }
+    val launcher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission(),
+        ) { isGranted ->
+            hasCameraPermission = true
+            if (!isGranted) {
+                Toast
+                    .makeText(context, "Notifications permission denied", Toast.LENGTH_SHORT)
+                    .show()
+            }
+        }
+
+    LaunchedEffect(hasCameraPermission) {
+        launcher.launch(Manifest.permission.CAMERA)
+    }
 
     LaunchedEffect(Unit) {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
@@ -133,58 +183,91 @@ fun CameraScreen(onEvent: (PlantCheckerViewModel.UiEvent) -> Unit) {
             }
         } catch (e: Exception) {
             Log.e("CameraX", "Use case binding failed", e)
-            captureStatus = "Error: ${e.message}"
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        // Display viewfinder
-        if (surfaceRequest != null && transformationInfo != null) {
-            surfaceRequest?.let { request ->
-                Viewfinder(
-                    surfaceRequest = request,
-                    modifier = Modifier.fillMaxSize(),
-                    implementationMode = ImplementationMode.EMBEDDED,
-                    transformationInfo = transformationInfo!!,
-                )
-            }
-        }
-        // Capture button and status
-        Column(
-            modifier =
-                Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                text = captureStatus,
-                color = androidx.compose.ui.graphics.Color.White,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(bottom = 16.dp),
-            )
-
-            Button(
-                onClick = {
-                    imageCapture?.let { capture ->
-                        captureImage(
-                            capture = capture,
-                            executor = executor,
-                            onSuccess = { savedUri ->
-                                onEvent(PlantCheckerViewModel.UiEvent.OnPictureTaken(savedUri))
-                                captureStatus = "Image saved: $savedUri"
-                            },
-                            onError = { exception ->
-                                captureStatus = "Capture failed: ${exception.message}"
-                            },
-                        )
-                    } ?: run {
-                        captureStatus = "Camera not ready"
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text("Plant Checker")
+                },
+                navigationIcon = {
+                    IconButton(onClick = { onBackPressedDispatcher?.onBackPressed() }) {
+                        Icon(painter = painterResource(R.drawable.ic_arrow_back), null)
                     }
                 },
-                modifier = Modifier.size(72.dp),
+            )
+        },
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            if (surfaceRequest != null && transformationInfo != null) {
+                surfaceRequest?.let { request ->
+                    Viewfinder(
+                        surfaceRequest = request,
+                        modifier = Modifier.fillMaxSize(),
+                        implementationMode = ImplementationMode.EMBEDDED,
+                        transformationInfo = transformationInfo!!,
+                    )
+                }
+            }
+            Column(
+                modifier =
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text("📷", style = MaterialTheme.typography.headlineMedium)
+                FloatingActionButton(
+                    onClick = {
+                        imageCapture?.let { capture ->
+                            captureImage(
+                                capture = capture,
+                                executor = executor,
+                                onSuccess = { savedUri ->
+                                    onEvent(PlantCheckerViewModel.UiEvent.OnPictureTaken(savedUri))
+                                },
+                                onError = { exception ->
+                                    Log.e("CameraX", "Image capture failed", exception)
+                                },
+                            )
+                        } ?: run {
+                        }
+                    },
+                ) {
+                    Icon(painterResource(R.drawable.ic_search), contentDescription = null)
+                }
+            }
+            if (uiState.isLoading) {
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = .7f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+        }
+    }
+
+    if (uiState.error) {
+        Dialog(onDismissRequest = { onEvent(PlantCheckerViewModel.UiEvent.DismissError) }) {
+            Card(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text(
+                        "Sorry, we couldn't find that plant",
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.headlineSmall,
+                    )
+                    Button(
+                        onClick = { onEvent(PlantCheckerViewModel.UiEvent.DismissError) },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text("Try again")
+                    }
+                }
             }
         }
     }

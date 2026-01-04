@@ -64,6 +64,7 @@ import com.skinnyy.plantcare.Search
 import com.skinnyy.plantcare.db.FavoritePlant
 import com.skinnyy.plantcare.db.PersonalPlant
 import com.skinnyy.plantcare.db.PlantWithWateringDates
+import com.skinnyy.plantcare.ui.newplant.WateringSchedule
 import com.skinnyy.plantcare.ui.search.RemoteImage
 import com.skinnyy.plantcare.ui.search.SearchBar
 import com.skinnyy.plantcare.ui.theme.PlantCareTheme
@@ -385,6 +386,7 @@ private fun MyPlantWidgetPreview() {
                     scientificName = "Monstera Deluca",
                     name = "Monstera",
                     imageUrl = "www.google.com",
+                    wateringSchedule = WateringSchedule.Daily,
                 ),
                 listOf(),
             ),
