@@ -33,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import com.skinnyy.plantcare.About
 import com.skinnyy.plantcare.Home
 import com.skinnyy.plantcare.Notifications
 import com.skinnyy.plantcare.Profile
@@ -58,6 +59,8 @@ internal fun ProfileScreen(
                 backstack.add(SignIn)
                 backstack.removeAll(listOf(Profile, Home))
             }
+
+            ProfileViewModel.UiAction.NavigateToAbout -> backstack.add(About)
         }
     }
     ProfileContent(modifier = modifier, onEvent = { viewModel.onEvent(it) })
@@ -114,7 +117,7 @@ private fun ProfileContent(
                     HorizontalDivider(Modifier.padding(horizontal = 16.dp))
                     SettingsItem("Notifications", { onEvent(ProfileViewModel.UiEvent.OnNotificationsClick) })
                     HorizontalDivider(Modifier.padding(horizontal = 16.dp))
-                    SettingsItem("About", {})
+                    SettingsItem("About", { onEvent(ProfileViewModel.UiEvent.OnAboutClick) })
                 }
             }
 

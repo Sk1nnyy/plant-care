@@ -52,20 +52,37 @@ val DarkColorScheme =
         surfaceTint = Color(0xFF44E55F),
     )
 
-private val LightColorScheme =
+val LightColorScheme =
     lightColorScheme(
-        primary = Purple40,
-        secondary = PurpleGrey40,
-        tertiary = Pink40,
-        /* Other default colors to override
-        background = Color(0xFFFFFBFE),
-        surface = Color(0xFFFFFBFE),
-        onPrimary = Color.White,
-        onSecondary = Color.White,
-        onTertiary = Color.White,
-        onBackground = Color(0xFF1C1B1F),
-        onSurface = Color(0xFF1C1B1F),
-         */
+        primary = Color(0xFF44E55F),
+        onPrimary = Color(0xFF00390D),
+        primaryContainer = Color(0xFF8CFF99),
+        onPrimaryContainer = Color(0xFF002106),
+        secondary = Color(0xFF4F6353),
+        onSecondary = Color(0xFFFFFFFF),
+        secondaryContainer = Color(0xFFD4E8D6),
+        onSecondaryContainer = Color(0xFF0C1F13),
+        tertiary = Color(0xFF406070),
+        onTertiary = Color(0xFFFFFFFF),
+        tertiaryContainer = Color(0xFFC6E8FF),
+        onTertiaryContainer = Color(0xFF001E2A),
+        error = Color(0xFFBA1A1A),
+        onError = Color(0xFFFFFFFF),
+        errorContainer = Color(0xFFFFDAD6),
+        onErrorContainer = Color(0xFF410002),
+        background = Color(0xFFFBFDF8),
+        onBackground = Color(0xFF191C19),
+        surface = Color(0xFFFBFDF8),
+        onSurface = Color(0xFF191C19),
+        surfaceVariant = Color(0xFFDDE5DD),
+        onSurfaceVariant = Color(0xFF414942),
+        outline = Color(0xFF717971),
+        outlineVariant = Color(0xFFC1C9C1),
+        scrim = Color(0xFF000000),
+        inverseSurface = Color(0xFF2E2F2D),
+        inverseOnSurface = Color(0xFFF0F1EF),
+        inversePrimary = Color(0xFF44E55F),
+        surfaceTint = Color(0xFF44E55F),
     )
 
 @Composable

@@ -20,6 +20,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigation3.ui.NavDisplay
+import com.skinnyy.plantcare.ui.about.AboutScreen
 import com.skinnyy.plantcare.ui.favorites.FavoritesScreen
 import com.skinnyy.plantcare.ui.home.HomeScreen
 import com.skinnyy.plantcare.ui.imagepreview.ImagePreviewScreen
@@ -130,6 +131,9 @@ fun PlantCareApp() {
                         entry<ImagePreview> {
                             ImagePreviewScreen(it.imageUrl)
                         }
+                        entry<About> {
+                            AboutScreen()
+                        }
                     },
                 transitionSpec = {
                     // Slide in from right when navigating forward
@@ -173,6 +177,9 @@ data object Profile : NavKey
 
 @Serializable
 data object Theme : NavKey
+
+@Serializable
+data object About : NavKey
 
 @Serializable
 data object Notifications : NavKey

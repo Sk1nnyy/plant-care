@@ -38,6 +38,12 @@ class ProfileViewModel(
                     _uiEvents.emit(UiAction.Logout)
                 }
             }
+
+            UiEvent.OnAboutClick -> {
+                viewModelScope.launch {
+                    _uiEvents.emit(UiAction.NavigateToAbout)
+                }
+            }
         }
     }
 
@@ -50,6 +56,8 @@ class ProfileViewModel(
 
         data object OnNotificationsClick : UiEvent()
 
+        data object OnAboutClick : UiEvent()
+
         data object OnLogoutClick : UiEvent()
     }
 
@@ -57,6 +65,8 @@ class ProfileViewModel(
         data object NavigateToTheme : UiAction()
 
         data object NavigateToNotifications : UiAction()
+
+        data object NavigateToAbout : UiAction()
 
         data object Logout : UiAction()
     }
