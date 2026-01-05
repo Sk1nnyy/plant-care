@@ -97,8 +97,10 @@ private fun PlantPickerContent(
             ) {
                 SearchBar(
                     {
-                        PlantPickerViewModel.UiEvent.QueryChanged(
-                            it,
+                        onEvent(
+                            PlantPickerViewModel.UiEvent.QueryChanged(
+                                it,
+                            ),
                         )
                     },
                 )

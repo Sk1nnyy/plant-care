@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import com.skinnyy.plantcare.Home
+import com.skinnyy.plantcare.SignIn
 import com.skinnyy.plantcare.ui.theme.PlantCareTheme
 import org.koin.androidx.compose.koinViewModel
 
@@ -39,14 +40,14 @@ fun SignInScreen(
     val uiAction = viewModel.uiEvents.collectAsState(null).value
     LaunchedEffect(uiAction) {
         when (uiAction) {
-            is SignInViewModel.UiAction.MoveToMain -> navController.add(Home)
+            is SignInViewModel.UiAction.MoveToMain -> {
+                navController.add(Home)
+                navController.remove(SignIn)
+            }
             null -> {}
         }
     }
-    LaunchedEffect(Unit) {
-        viewModel.onEvent(SignInViewModel.UiEvent.CheckSignInStatus)
-    }
-    SignInContent(isLoading = viewState.isLoading, onEvent = { viewModel.onEvent(it) })
+    SignInContent(isLoading = viewState.isLoading, onEvent = { viewModel.onEvent(it) }, modifier)
 }
 
 @Composable
@@ -55,7 +56,7 @@ fun SignInContent(
     onEvent: (SignInViewModel.UiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Scaffold { paddingValues ->
+    Scaffold(modifier) { paddingValues ->
         Box(Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier.fillMaxSize().padding(paddingValues),

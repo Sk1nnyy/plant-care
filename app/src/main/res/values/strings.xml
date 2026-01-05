@@ -6,4 +6,11 @@
     <string name="label_unknown">Unknown</string>
     <string name="label_distribution">Distribution</string>
     <string name="label_edible">Edible</string>
+    <string name="label_watering_schedule_none">None</string>
+    <string name="label_watering_schedule_daily">Daily</string>
+    <string name="label_watering_schedule_weekly">Weekly</string>
+    <string name="label_watering_schedule_monthly">Monthly</string>
+    <string name="label_watering_schedule_multiple_days_in_week">Multiple days in the week</string>
+    <string name="action_mark_as_watered">Mark as watered</string>
+    <string name="action_enable_notifications">Enable notifications</string>
 </resources>

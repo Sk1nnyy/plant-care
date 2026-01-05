@@ -43,14 +43,6 @@ class SignInViewModel(
                     }
                 }
             }
-
-            UiEvent.CheckSignInStatus -> {
-                if (authRepository.isUserLoggedIn()) {
-                    viewModelScope.launch {
-                        _uiEvents.emit(UiAction.MoveToMain)
-                    }
-                }
-            }
         }
     }
 
@@ -61,8 +53,6 @@ class SignInViewModel(
     )
 
     sealed class UiEvent {
-        data object CheckSignInStatus : UiEvent()
-
         data class SignInEmail(
             val email: String,
             val password: String,

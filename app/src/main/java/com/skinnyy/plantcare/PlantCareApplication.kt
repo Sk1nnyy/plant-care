@@ -15,12 +15,14 @@ import com.skinnyy.plantcare.ui.myplantdetail.MyPlantDetailViewModel
 import com.skinnyy.plantcare.ui.myplants.MyPlantsViewModel
 import com.skinnyy.plantcare.ui.newplant.NewPlantsViewModel
 import com.skinnyy.plantcare.ui.notifications.NotificationsViewModel
+import com.skinnyy.plantcare.ui.notifications.createReminderChannel
 import com.skinnyy.plantcare.ui.plantchecker.PlantCheckerViewModel
 import com.skinnyy.plantcare.ui.plantdetail.PlantDetailViewModel
 import com.skinnyy.plantcare.ui.plantpicker.PlantPickerViewModel
 import com.skinnyy.plantcare.ui.profile.ProfileViewModel
 import com.skinnyy.plantcare.ui.search.SearchViewModel
 import com.skinnyy.plantcare.ui.signin.SignInViewModel
+import com.skinnyy.plantcare.ui.splash.SplashViewModel
 import com.skinnyy.plantcare.ui.theme.dataStore
 import com.skinnyy.plantcare.ui.themepicker.ThemePickerViewModel
 import kotlinx.serialization.json.Json
@@ -36,6 +38,7 @@ import retrofit2.converter.kotlinx.serialization.asConverterFactory
 class PlantCareApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+        createReminderChannel()
 
         startKoin {
             androidLogger()
@@ -77,6 +80,7 @@ class PlantCareApplication : Application() {
                     viewModel { parameters -> MyPlantDetailViewModel(parameters.get(), get(), get()) }
                     viewModel { PlantCheckerViewModel() }
                     viewModel { NotificationsViewModel(get()) }
+                    viewModel { SplashViewModel(get()) }
 
                     single { get<Context>().dataStore }
                     single<AppDatabase> {

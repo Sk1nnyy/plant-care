@@ -114,11 +114,11 @@ fun CameraScreen(
             }
         }
 
-    LaunchedEffect(hasCameraPermission) {
+    LaunchedEffect(Unit) {
         launcher.launch(Manifest.permission.CAMERA)
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(hasCameraPermission) {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         val cameraProvider = cameraProviderFuture.get()
 
@@ -200,7 +200,7 @@ fun CameraScreen(
             )
         },
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize().padding(it)) {
             if (surfaceRequest != null && transformationInfo != null) {
                 surfaceRequest?.let { request ->
                     Viewfinder(

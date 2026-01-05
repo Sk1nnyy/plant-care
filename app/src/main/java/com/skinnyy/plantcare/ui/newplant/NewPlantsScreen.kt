@@ -27,7 +27,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -88,7 +87,9 @@ private fun NewPlantContent(
     val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     var wateringScheduleType by rememberSaveable { mutableStateOf(WateringScheduleType.None) }
     var isDropdownExpanded by remember { mutableStateOf(false) }
-    val selectedDaysOfTheWeek = rememberSaveable { mutableStateListOf<DayOfTheWeek>() }
+    var selectedDaysOfTheWeek by rememberSaveable {
+        mutableStateOf<List<DayOfTheWeek>>(emptyList())
+    }
     var currentStep by rememberSaveable { mutableStateOf(NewPlantStep.Name) }
 
     val plantNameTextFieldState = rememberTextFieldState()
@@ -183,7 +184,7 @@ private fun NewPlantContent(
                         Text("Do you want to set a schedule for watering?")
 
                         LaunchedEffect(wateringScheduleType) {
-                            selectedDaysOfTheWeek.clear()
+                            selectedDaysOfTheWeek = emptyList()
                         }
                         Card(modifier = Modifier.clickable { isDropdownExpanded = true }) {
                             Text(
@@ -224,13 +225,12 @@ private fun NewPlantContent(
                                             Modifier.weight(1f).clickable {
                                                 if (wateringScheduleType.allowsMultipleSelection()) {
                                                     if (selectedDaysOfTheWeek.contains(dayOfTheWeek)) {
-                                                        selectedDaysOfTheWeek.remove(dayOfTheWeek)
+                                                        selectedDaysOfTheWeek = selectedDaysOfTheWeek - dayOfTheWeek
                                                     } else {
-                                                        selectedDaysOfTheWeek.add(dayOfTheWeek)
+                                                        selectedDaysOfTheWeek = selectedDaysOfTheWeek + dayOfTheWeek
                                                     }
                                                 } else {
-                                                    selectedDaysOfTheWeek.clear()
-                                                    selectedDaysOfTheWeek.add(dayOfTheWeek)
+                                                    selectedDaysOfTheWeek = listOf(dayOfTheWeek)
                                                 }
                                             },
                                         border =
@@ -291,27 +291,29 @@ private fun NewPlantPreview() {
 }
 
 @Serializable
-sealed class WateringSchedule {
+sealed class WateringSchedule(
+    val displayNameRes: Int,
+) {
     @Serializable
-    data object None : WateringSchedule()
+    data object None : WateringSchedule(R.string.label_watering_schedule_none)
 
     @Serializable
-    data object Daily : WateringSchedule()
+    data object Daily : WateringSchedule(R.string.label_watering_schedule_daily)
 
     @Serializable
     data class Weekly(
         val dayOfTheWeek: DayOfTheWeek,
-    ) : WateringSchedule()
+    ) : WateringSchedule(R.string.label_watering_schedule_weekly)
 
     @Serializable
     data class Monthly(
         val dayOfTheWeek: DayOfTheWeek,
-    ) : WateringSchedule()
+    ) : WateringSchedule(R.string.label_watering_schedule_monthly)
 
     @Serializable
     data class MultipleDaysInWeek(
         val daysOfTheWeek: List<DayOfTheWeek>,
-    ) : WateringSchedule()
+    ) : WateringSchedule(R.string.label_watering_schedule_multiple_days_in_week)
 }
 
 enum class DayOfTheWeek {
@@ -322,6 +324,18 @@ enum class DayOfTheWeek {
     Friday,
     Saturday,
     Sunday,
+    ;
+
+    fun calendarDayOfTheWeek(): Int =
+        when (this) {
+            DayOfTheWeek.Monday -> 2
+            DayOfTheWeek.Tuesday -> 3
+            DayOfTheWeek.Wednesday -> 4
+            DayOfTheWeek.Thursday -> 5
+            DayOfTheWeek.Friday -> 6
+            DayOfTheWeek.Saturday -> 7
+            DayOfTheWeek.Sunday -> 1
+        }
 }
 
 enum class WateringScheduleType {

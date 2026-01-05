@@ -13,9 +13,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -35,6 +33,7 @@ import com.skinnyy.plantcare.ui.plantpicker.PlantPickerScreen
 import com.skinnyy.plantcare.ui.profile.ProfileScreen
 import com.skinnyy.plantcare.ui.search.SearchScreen
 import com.skinnyy.plantcare.ui.signin.SignInScreen
+import com.skinnyy.plantcare.ui.splash.SplashScreen
 import com.skinnyy.plantcare.ui.theme.PlantCareTheme
 import com.skinnyy.plantcare.ui.themepicker.ThemePickerScreen
 import com.skinnyy.plantcare.utils.LocalResultEventBus
@@ -59,7 +58,7 @@ class MainActivity : ComponentActivity() {
 @PreviewScreenSizes
 @Composable
 fun PlantCareApp() {
-    val backStack = rememberNavBackStack(SignIn)
+    val backStack = rememberNavBackStack(Splash)
     val resultBus = remember { ResultEventBus() }
 
     CompositionLocalProvider(
@@ -73,6 +72,9 @@ fun PlantCareApp() {
                     entryProvider {
                         val sharedTransitionScope = this@SharedTransitionLayout
 
+                        entry<Splash> {
+                            SplashScreen(backStack)
+                        }
                         entry<SignIn> {
                             SignInScreen(backStack)
                         }
@@ -86,7 +88,10 @@ fun PlantCareApp() {
                         }
 
                         entry<PlantDetail> {
-                            PlantDetailScreen(backStack, koinViewModel(key = it.id) { parametersOf(it.id) })
+                            PlantDetailScreen(
+                                backStack,
+                                koinViewModel(key = it.id) { parametersOf(it.id) },
+                            )
                         }
 
                         entry<Profile> {
@@ -145,6 +150,9 @@ fun PlantCareApp() {
         }
     }
 }
+
+@Serializable
+data object Splash : NavKey
 
 @Serializable
 data object SignIn : NavKey

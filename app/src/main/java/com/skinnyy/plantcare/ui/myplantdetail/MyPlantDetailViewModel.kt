@@ -7,6 +7,8 @@ import com.skinnyy.plantcare.data.SpeciesDetail
 import com.skinnyy.plantcare.db.PersonalPlantsRepository
 import com.skinnyy.plantcare.db.PlantWithWateringDates
 import com.skinnyy.plantcare.db.WateringEvent
+import com.skinnyy.plantcare.ui.plantdetail.PlantDetailViewModel.UiAction
+import com.skinnyy.plantcare.ui.plantdetail.PlantDetailViewModel.UiEvent
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -48,6 +50,24 @@ class MyPlantDetailViewModel(
                     )
                 }
             }
+
+            UiEvent.DismissNotificationsDialog -> {
+                viewModelScope.launch {
+                    _uiState.emit(_uiState.value.copy(isShowingNotificationsDialog = false))
+                }
+            }
+
+            UiEvent.ShowNotificationsDialog -> {
+                viewModelScope.launch {
+                    _uiState.emit(_uiState.value.copy(isShowingNotificationsDialog = true))
+                }
+            }
+
+            is MyPlantDetailViewModel.UiEvent.OnImageClick -> {
+                viewModelScope.launch {
+                    _uiEvents.emit(UiAction.NavigateToImagePreview(event.imageUrl))
+                }
+            }
         }
     }
 
@@ -55,11 +75,24 @@ class MyPlantDetailViewModel(
         val isLoading: Boolean,
         val species: SpeciesDetail? = null,
         val plantWithWateringDates: PlantWithWateringDates? = null,
+        var isShowingNotificationsDialog: Boolean = false,
     )
 
     sealed class UiEvent {
         data object MarkPlantAsWatered : UiEvent()
+
+        data object ShowNotificationsDialog : UiEvent()
+
+        data object DismissNotificationsDialog : UiEvent()
+
+        data class OnImageClick(
+            val imageUrl: String,
+        ) : UiEvent()
     }
 
-    sealed class UiAction
+    sealed class UiAction {
+        data class NavigateToImagePreview(
+            val imageUrl: String,
+        ) : UiAction()
+    }
 }

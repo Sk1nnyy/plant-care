@@ -1,6 +1,7 @@
 package com.skinnyy.plantcare.ui.profile
 
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,25 +33,31 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import com.skinnyy.plantcare.Home
 import com.skinnyy.plantcare.Notifications
+import com.skinnyy.plantcare.Profile
 import com.skinnyy.plantcare.R
+import com.skinnyy.plantcare.SignIn
 import com.skinnyy.plantcare.Theme
-import com.skinnyy.plantcare.ui.search.RemoteImage
 import com.skinnyy.plantcare.ui.theme.PlantCareTheme
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 internal fun ProfileScreen(
-    navController: NavBackStack<NavKey>,
+    backstack: NavBackStack<NavKey>,
     modifier: Modifier = Modifier,
     viewModel: ProfileViewModel = koinViewModel(),
 ) {
     val uiAction = viewModel.uiEvents.collectAsState(null).value
     LaunchedEffect(uiAction) {
         when (uiAction) {
-            ProfileViewModel.UiAction.NavigateToTheme -> navController.add(Theme)
+            ProfileViewModel.UiAction.NavigateToTheme -> backstack.add(Theme)
             null -> {}
-            ProfileViewModel.UiAction.NavigateToNotifications -> navController.add(Notifications)
+            ProfileViewModel.UiAction.NavigateToNotifications -> backstack.add(Notifications)
+            ProfileViewModel.UiAction.Logout -> {
+                backstack.add(SignIn)
+                backstack.removeAll(listOf(Profile, Home))
+            }
         }
     }
     ProfileContent(modifier = modifier, onEvent = { viewModel.onEvent(it) })
@@ -90,8 +97,9 @@ private fun ProfileContent(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                RemoteImage(
-                    "www.google.com",
+                Image(
+                    painterResource(R.drawable.ic_gamer),
+                    contentDescription = null,
                     modifier =
                         Modifier
                             .size(128.dp)
@@ -110,7 +118,7 @@ private fun ProfileContent(
                 }
             }
 
-            Button(onClick = {}, modifier = Modifier.fillMaxWidth()) {
+            Button(onClick = { onEvent(ProfileViewModel.UiEvent.OnLogoutClick) }, modifier = Modifier.fillMaxWidth()) {
                 Text("Logout")
             }
         }

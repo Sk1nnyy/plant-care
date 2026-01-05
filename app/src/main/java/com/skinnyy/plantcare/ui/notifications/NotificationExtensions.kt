@@ -12,6 +12,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.skinnyy.plantcare.R
+import com.skinnyy.plantcare.ui.newplant.WateringSchedule
 import java.time.Duration
 import java.time.Instant
 import java.util.Calendar
@@ -68,53 +69,11 @@ fun Context.buildWaterReminderNotification(
         ).build()
 }
 
-// @SuppressLint("ScheduleExactAlarm")
-// fun Context.scheduleNextPlantReminder(
-//    plantId: Int,
-//    hour: Int,
-//    minute: Int
-// ) {
-//    val now = Calendar.getInstance()
-//
-//    val calendar = Calendar.getInstance().apply {
-//        set(Calendar.HOUR_OF_DAY, hour)
-//        set(Calendar.MINUTE, minute)
-//        set(Calendar.SECOND, 0)
-//        set(Calendar.MILLISECOND, 0)
-//
-//        // if time today already passed, schedule for tomorrow
-//        if (before(now)) {
-//            add(Calendar.DAY_OF_MONTH, 1)
-//        }
-//    }
-//
-//    val notificationId = plantId.toInt()
-//
-//    val intent = Intent(this, ReminderReceiver::class.java).apply {
-//        action = ACTION_SHOW_REMINDER
-//        putExtra(EXTRA_PLANT_ID, plantId)
-//        putExtra(EXTRA_NOTIFICATION_ID, notificationId)
-//    }
-//
-//    val pendingIntent = PendingIntent.getBroadcast(
-//        this,
-//        notificationId,
-//        intent,
-//        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-//    )
-//
-//    val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-//    alarmManager.setExactAndAllowWhileIdle(
-//        AlarmManager.RTC_WAKEUP,
-//        calendar.timeInMillis,
-//        pendingIntent
-//    )
-// }
-
 fun Context.scheduleDailyPlantReminder(
     plantId: Int,
     hour: Int,
     minute: Int,
+    schedule: WateringSchedule,
 ) {
     val workRequest =
         PeriodicWorkRequestBuilder<WateringWorker>(
@@ -124,7 +83,7 @@ fun Context.scheduleDailyPlantReminder(
             workDataOf(EXTRA_PLANT_ID to plantId),
         )
             // Optional: constrain to specific time window
-            .setInitialDelay(calculateInitialDelay(hour, minute))
+            .setInitialDelay(calculateInitialDelay(hour, minute, schedule))
             .build()
 
     WorkManager
@@ -139,6 +98,7 @@ fun Context.scheduleDailyPlantReminder(
 private fun Context.calculateInitialDelay(
     hour: Int,
     minute: Int,
+    wateringSchedule: WateringSchedule,
 ): Duration {
     val now = Calendar.getInstance()
     val target =
@@ -147,7 +107,28 @@ private fun Context.calculateInitialDelay(
             set(Calendar.MINUTE, minute)
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
-            if (before(now)) add(Calendar.DAY_OF_MONTH, 1)
+            if (before(now)) {
+                when (wateringSchedule) {
+                    WateringSchedule.Daily -> add(Calendar.DAY_OF_MONTH, 1)
+                    is WateringSchedule.Monthly -> add(Calendar.MONTH, 1)
+                    is WateringSchedule.MultipleDaysInWeek -> {
+                        val targetDays =
+                            wateringSchedule.daysOfTheWeek
+                                .map { it.calendarDayOfTheWeek() }
+
+                        // Find the next day offset (1..7)
+                        val daysToAdd =
+                            targetDays.minOfOrNull { targetDay ->
+                                val diff = (targetDay - now.get(Calendar.DAY_OF_WEEK) + 7) % 7
+                                if (diff == 0) 7 else diff
+                            } ?: 7
+
+                        add(Calendar.DAY_OF_YEAR, daysToAdd)
+                    }
+                    WateringSchedule.None -> {}
+                    is WateringSchedule.Weekly -> add(Calendar.WEEK_OF_YEAR, 1)
+                }
+            }
         }
     return Duration.between(
         Instant.now(),

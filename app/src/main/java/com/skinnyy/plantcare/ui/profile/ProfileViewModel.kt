@@ -31,6 +31,13 @@ class ProfileViewModel(
                     _uiEvents.emit(UiAction.NavigateToNotifications)
                 }
             }
+
+            UiEvent.OnLogoutClick -> {
+                viewModelScope.launch {
+                    authRepository.signOut()
+                    _uiEvents.emit(UiAction.Logout)
+                }
+            }
         }
     }
 
@@ -42,11 +49,15 @@ class ProfileViewModel(
         data object OnThemeClick : UiEvent()
 
         data object OnNotificationsClick : UiEvent()
+
+        data object OnLogoutClick : UiEvent()
     }
 
     sealed class UiAction {
         data object NavigateToTheme : UiAction()
 
         data object NavigateToNotifications : UiAction()
+
+        data object Logout : UiAction()
     }
 }
