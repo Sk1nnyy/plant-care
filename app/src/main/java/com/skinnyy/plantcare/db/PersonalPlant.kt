@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import com.skinnyy.plantcare.db.converters.WateringScheduleConverter
-import com.skinnyy.plantcare.ui.newplant.WateringSchedule
+import com.skinnyy.plantcare.ui.presentation.newplant.domain.WateringSchedule
 
 @Entity(tableName = "personal_plant")
 data class PersonalPlant(

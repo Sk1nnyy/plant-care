@@ -15,31 +15,45 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
-import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigation3.ui.NavDisplay
-import com.skinnyy.plantcare.ui.about.AboutScreen
-import com.skinnyy.plantcare.ui.favorites.FavoritesScreen
-import com.skinnyy.plantcare.ui.home.HomeScreen
-import com.skinnyy.plantcare.ui.imagepreview.ImagePreviewScreen
-import com.skinnyy.plantcare.ui.myplantdetail.MyPlantDetailScreen
-import com.skinnyy.plantcare.ui.myplants.MyPlantsScreen
-import com.skinnyy.plantcare.ui.newplant.NewPlantScreen
-import com.skinnyy.plantcare.ui.notifications.NotificationsScreen
-import com.skinnyy.plantcare.ui.plantchecker.PlantCheckerScreen
-import com.skinnyy.plantcare.ui.plantdetail.PlantDetailScreen
-import com.skinnyy.plantcare.ui.plantpicker.PlantPickerScreen
-import com.skinnyy.plantcare.ui.profile.ProfileScreen
-import com.skinnyy.plantcare.ui.search.SearchScreen
-import com.skinnyy.plantcare.ui.signin.SignInScreen
-import com.skinnyy.plantcare.ui.splash.SplashScreen
+import com.skinnyy.plantcare.ui.About
+import com.skinnyy.plantcare.ui.Favorites
+import com.skinnyy.plantcare.ui.Home
+import com.skinnyy.plantcare.ui.ImagePreview
+import com.skinnyy.plantcare.ui.MyPlantDetail
+import com.skinnyy.plantcare.ui.MyPlants
+import com.skinnyy.plantcare.ui.NewPlant
+import com.skinnyy.plantcare.ui.Notifications
+import com.skinnyy.plantcare.ui.PlantChecker
+import com.skinnyy.plantcare.ui.PlantDetail
+import com.skinnyy.plantcare.ui.PlantPicker
+import com.skinnyy.plantcare.ui.Profile
+import com.skinnyy.plantcare.ui.Search
+import com.skinnyy.plantcare.ui.SignIn
+import com.skinnyy.plantcare.ui.Splash
+import com.skinnyy.plantcare.ui.Theme
+import com.skinnyy.plantcare.ui.presentation.about.AboutScreen
+import com.skinnyy.plantcare.ui.presentation.favorites.FavoritesScreen
+import com.skinnyy.plantcare.ui.presentation.home.HomeScreen
+import com.skinnyy.plantcare.ui.presentation.imagepreview.ImagePreviewScreen
+import com.skinnyy.plantcare.ui.presentation.myplantdetail.MyPlantDetailScreen
+import com.skinnyy.plantcare.ui.presentation.myplants.MyPlantsScreen
+import com.skinnyy.plantcare.ui.presentation.newplant.NewPlantScreen
+import com.skinnyy.plantcare.ui.presentation.notifications.NotificationsScreen
+import com.skinnyy.plantcare.ui.presentation.plantchecker.PlantCheckerScreen
+import com.skinnyy.plantcare.ui.presentation.plantdetail.PlantDetailScreen
+import com.skinnyy.plantcare.ui.presentation.plantpicker.PlantPickerScreen
+import com.skinnyy.plantcare.ui.presentation.profile.ProfileScreen
+import com.skinnyy.plantcare.ui.presentation.search.SearchScreen
+import com.skinnyy.plantcare.ui.presentation.signin.SignInScreen
+import com.skinnyy.plantcare.ui.presentation.splash.SplashScreen
+import com.skinnyy.plantcare.ui.presentation.themepicker.ThemePickerScreen
 import com.skinnyy.plantcare.ui.theme.PlantCareTheme
-import com.skinnyy.plantcare.ui.themepicker.ThemePickerScreen
 import com.skinnyy.plantcare.utils.LocalResultEventBus
 import com.skinnyy.plantcare.utils.ResultEventBus
-import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -154,59 +168,3 @@ fun PlantCareApp() {
         }
     }
 }
-
-@Serializable
-data object Splash : NavKey
-
-@Serializable
-data object SignIn : NavKey
-
-@Serializable
-data object Home : NavKey
-
-@Serializable
-data object Search : NavKey
-
-@Serializable
-data class PlantDetail(
-    val id: String,
-) : NavKey
-
-@Serializable
-data object Profile : NavKey
-
-@Serializable
-data object Theme : NavKey
-
-@Serializable
-data object About : NavKey
-
-@Serializable
-data object Notifications : NavKey
-
-@Serializable
-data object Favorites : NavKey
-
-@Serializable
-data object MyPlants : NavKey
-
-@Serializable
-data class MyPlantDetail(
-    val id: Int,
-) : NavKey
-
-@Serializable
-data object NewPlant : NavKey
-
-@Serializable
-data class PlantPicker(
-    val query: String?,
-) : NavKey
-
-@Serializable
-data object PlantChecker : NavKey
-
-@Serializable
-data class ImagePreview(
-    val imageUrl: String,
-) : NavKey
