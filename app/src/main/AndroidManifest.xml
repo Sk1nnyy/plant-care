@@ -32,7 +32,7 @@
         </activity>
 
         <receiver
-            android:name=".ui.notifications.NotificationBroadcastReceiver"
+            android:name=".ui.presentation.notifications.NotificationBroadcastReceiver"
             android:exported="false" />
 
     </application>
