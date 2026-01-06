@@ -43,9 +43,9 @@ private fun AboutContent(modifier: Modifier = Modifier) {
             """This app serves as a demo to showcase my skills
             |
             |Technologies used:
-            |Kotlin, Jetpack Compose, Firebase(Functions for backend, Crashlytics, Auth, App Distribution), Koin, Retrofit, CameraX, Coil, Room, Navigation3, Datastore, GitHub Actions for CI/CD
+            |Kotlin, Jetpack Compose, Firebase(Functions for backend, Crashlytics, Auth, App Distribution), Koin, Retrofit, CameraX, Coil, Room, Navigation3, Datastore, Turbine, Mockk and GitHub Actions for CI/CD
             |
-            |Some of the screens could have more options but they mostly focus on nice transitions and showcase a few different ways of doing things and the different components
+            |Some of the screens could have more options but they mostly focus on a clean code, nice transitions and showcase a few different ways of doing things and the different components both UI and Android related.
             |For the content I'm using Trefflo and PlantApi for the scanner.
             |To get the auth token and make some of the requests I'm using Firebase Functions as the proxy for the api's
             |If anything doesn't work most likely the api token's should be exhausted for the day/minute

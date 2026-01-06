@@ -102,4 +102,7 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.9.1")
 
     implementation(libs.telephoto.zoomable.coil)
+    implementation("app.cash.turbine:turbine:1.2.1")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
+    testImplementation("io.mockk:mockk:1.13.9")
 }

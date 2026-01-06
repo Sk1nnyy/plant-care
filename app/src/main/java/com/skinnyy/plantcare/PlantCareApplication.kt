@@ -9,22 +9,22 @@ import com.skinnyy.plantcare.api.TreffloService
 import com.skinnyy.plantcare.db.AppDatabase
 import com.skinnyy.plantcare.db.FavoritePlantRepository
 import com.skinnyy.plantcare.db.PersonalPlantsRepository
-import com.skinnyy.plantcare.ui.favorites.FavoritesViewModel
-import com.skinnyy.plantcare.ui.home.HomeViewModel
-import com.skinnyy.plantcare.ui.myplantdetail.MyPlantDetailViewModel
-import com.skinnyy.plantcare.ui.myplants.MyPlantsViewModel
-import com.skinnyy.plantcare.ui.newplant.NewPlantsViewModel
-import com.skinnyy.plantcare.ui.notifications.NotificationsViewModel
-import com.skinnyy.plantcare.ui.notifications.createReminderChannel
-import com.skinnyy.plantcare.ui.plantchecker.PlantCheckerViewModel
-import com.skinnyy.plantcare.ui.plantdetail.PlantDetailViewModel
-import com.skinnyy.plantcare.ui.plantpicker.PlantPickerViewModel
-import com.skinnyy.plantcare.ui.profile.ProfileViewModel
-import com.skinnyy.plantcare.ui.search.SearchViewModel
-import com.skinnyy.plantcare.ui.signin.SignInViewModel
-import com.skinnyy.plantcare.ui.splash.SplashViewModel
+import com.skinnyy.plantcare.ui.presentation.favorites.FavoritesViewModel
+import com.skinnyy.plantcare.ui.presentation.home.HomeViewModel
+import com.skinnyy.plantcare.ui.presentation.myplantdetail.MyPlantDetailViewModel
+import com.skinnyy.plantcare.ui.presentation.myplants.MyPlantsViewModel
+import com.skinnyy.plantcare.ui.presentation.newplant.NewPlantsViewModel
+import com.skinnyy.plantcare.ui.presentation.notifications.NotificationsViewModel
+import com.skinnyy.plantcare.ui.presentation.notifications.createReminderChannel
+import com.skinnyy.plantcare.ui.presentation.plantchecker.PlantCheckerViewModel
+import com.skinnyy.plantcare.ui.presentation.plantdetail.PlantDetailViewModel
+import com.skinnyy.plantcare.ui.presentation.plantpicker.PlantPickerViewModel
+import com.skinnyy.plantcare.ui.presentation.profile.ProfileViewModel
+import com.skinnyy.plantcare.ui.presentation.search.SearchViewModel
+import com.skinnyy.plantcare.ui.presentation.signin.SignInViewModel
+import com.skinnyy.plantcare.ui.presentation.splash.SplashViewModel
+import com.skinnyy.plantcare.ui.presentation.themepicker.ThemePickerViewModel
 import com.skinnyy.plantcare.ui.theme.dataStore
-import com.skinnyy.plantcare.ui.themepicker.ThemePickerViewModel
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import org.koin.android.ext.koin.androidContext
@@ -77,7 +77,7 @@ class PlantCareApplication : Application() {
                     viewModel { MyPlantsViewModel(get()) }
                     viewModel { NewPlantsViewModel(get(), get()) }
                     viewModel { parameters -> PlantPickerViewModel(parameters.get(), get()) }
-                    viewModel { parameters -> MyPlantDetailViewModel(parameters.get(), get(), get()) }
+                    viewModel { parameters -> MyPlantDetailViewModel(parameters.get(), get()) }
                     viewModel { PlantCheckerViewModel() }
                     viewModel { NotificationsViewModel(get()) }
                     viewModel { SplashViewModel(get()) }

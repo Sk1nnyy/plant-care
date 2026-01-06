@@ -1,7 +1,7 @@
 package com.skinnyy.plantcare.db.converters
 
 import androidx.room.TypeConverter
-import com.skinnyy.plantcare.ui.newplant.WateringSchedule
+import com.skinnyy.plantcare.ui.presentation.newplant.domain.WateringSchedule
 import kotlinx.serialization.json.Json
 
 class WateringScheduleConverter {
