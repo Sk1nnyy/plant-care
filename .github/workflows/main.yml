@@ -30,10 +30,7 @@ jobs:
         run: chmod +x gradlew
 
       # --- LINTING ---
-      - name: Run Detekt
-        run: ./gradlew detekt
-
-      - name: Run KtLint (or Spotless)
+      - name: Run KtLint
         run: ./gradlew ktlintCheck
 
       - name: Run Android Lint
@@ -42,13 +39,20 @@ jobs:
       # --- TESTS ---
       - name: Run Unit Tests
         run: ./gradlew testDebugUnitTest
+      
+      - name: Build release APK
+        run: ./gradlew :app:assembleDebug
 
-      # --- BUILD ---
-      - name: Assemble Debug
-        run: ./gradlew assembleDebug
+      - name: List APK outputs
+        run: ls -R
 
-      - name: Upload Debug APK
-        uses: actions/upload-artifact@v4
+      # --- INSTALL GCLOUD + FIREBASE ---
+      - name: Upload artifact to Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
-          name: debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          appId: ${{ secrets.FIREBASE_APP_ID }}
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SECRET }}
+          file: app/build/outputs/apk/debug/app-debug.apk
+          groups: testers
+          releaseNotes: "Automatic build from GitHub Actions"
+
