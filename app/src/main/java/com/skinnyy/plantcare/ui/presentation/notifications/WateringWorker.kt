@@ -1,7 +1,11 @@
 package com.skinnyy.plantcare.ui.presentation.notifications
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.skinnyy.plantcare.db.PersonalPlantsRepository
@@ -26,6 +30,19 @@ class WateringWorker(
                 notificationId = plantId,
                 plantName = plant.plant.name,
             )
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val granted =
+                ContextCompat.checkSelfPermission(
+                    applicationContext,
+                    Manifest.permission.POST_NOTIFICATIONS,
+                ) == PackageManager.PERMISSION_GRANTED
+
+            if (!granted) {
+                // Permission not granted; skip posting
+                return Result.success()
+            }
+        }
 
         NotificationManagerCompat
             .from(applicationContext)
