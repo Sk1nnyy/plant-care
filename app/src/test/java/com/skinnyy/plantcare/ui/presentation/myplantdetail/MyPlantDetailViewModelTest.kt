@@ -1,4 +1,4 @@
-package com.skinnyy.plantcare.ui.presentation.myplants
+package com.skinnyy.plantcare.ui.presentation.myplantdetail
 
 import app.cash.turbine.test
 import com.skinnyy.plantcare.MainDispatcherRule
